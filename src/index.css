@@ -1,0 +1,152 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  
+  --color-system-bg: #020617;
+  --color-system-cyan: #22d3ee;
+  --color-system-red: #ef4444;
+  --color-system-glass: rgba(4, 7, 18, 0.92);
+  --color-system-border: rgba(34, 211, 238, 0.4);
+}
+
+@layer base {
+  body {
+    @apply bg-system-bg text-slate-300 font-sans overflow-hidden selection:bg-cyan-500/30;
+    background-image: 
+      radial-gradient(circle at 50% 50%, rgba(34, 211, 238, 0.03) 0%, transparent 70%),
+      linear-gradient(90deg, rgba(34, 211, 238, 0.01) 1px, transparent 1px);
+    background-size: 100% 100%, 60px 60px;
+  }
+}
+
+@layer utilities {
+  .perspective-1000 {
+    perspective: 1000px;
+  }
+}
+
+@layer components {
+  .hologram-glass {
+    @apply backdrop-blur-xl border border-system-border bg-system-glass shadow-[0_0_30px_rgba(34,211,238,0.15)];
+    background-image: linear-gradient(135deg, rgba(34, 211, 238, 0.05) 0%, transparent 100%);
+  }
+
+  .hologram-glow-cyan {
+    text-shadow: 0 0 10px rgba(34, 211, 238, 0.5), 0 0 20px rgba(34, 211, 238, 0.2);
+  }
+
+  .hologram-glow-red {
+    text-shadow: 0 0 10px rgba(239, 68, 68, 0.5), 0 0 20px rgba(239, 68, 68, 0.2);
+  }
+
+  .text-sharp {
+    @apply font-mono tracking-tight;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  .hologram-panel-glow {
+    box-shadow: 0 0 15px rgba(34, 211, 238, 0.1), inset 0 0 10px rgba(34, 211, 238, 0.05);
+  }
+
+  .projection-reveal {
+    @apply relative;
+  }
+
+  .scanlines {
+    display: none;
+  }
+
+  .flicker {
+    animation: flicker-anim 0.15s infinite;
+  }
+
+  @keyframes flicker-anim {
+    0% { opacity: 0.9; }
+    50% { opacity: 1; }
+    100% { opacity: 0.95; }
+  }
+
+  .energy-pulse {
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(34, 211, 238, 0.8) 0%, transparent 70%);
+    transform: scale(0);
+    animation: energy-pulse-anim 0.6s ease-out forwards;
+    pointer-events: none;
+    z-index: 50;
+  }
+
+  @keyframes energy-pulse-anim {
+    from { transform: scale(0); opacity: 1; }
+    to { transform: scale(4); opacity: 0; }
+  }
+
+  .noise {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    opacity: 0.01;
+    z-index: -1;
+    pointer-events: none;
+  }
+
+  .vignette {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, transparent 70%, rgba(0, 0, 0, 0.9) 100%);
+    z-index: 1;
+    pointer-events: none;
+  }
+}
+
+@keyframes glitch-anim {
+  0% { transform: translate(0); clip-path: inset(0 0 0 0); }
+  20% { transform: translate(-2px, 2px); clip-path: inset(10% 0 40% 0); }
+  40% { transform: translate(2px, -2px); clip-path: inset(30% 0 20% 0); }
+  60% { transform: translate(-2px, -2px); clip-path: inset(50% 0 10% 0); }
+  80% { transform: translate(2px, 2px); clip-path: inset(10% 0 70% 0); }
+  100% { transform: translate(0); clip-path: inset(0 0 0 0); }
+}
+
+  .glitch-active {
+  animation: glitch-anim 0.2s cubic-bezier(.25,.46,.45,.94) both infinite;
+  filter: hue-rotate(90deg) brightness(1.2);
+  text-shadow: 2px 0 #ff00c1, -2px 0 #00fff9;
+}
+
+.text-sharp {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+.cinematic-vignette {
+  background: radial-gradient(circle, transparent 40%, rgba(0,0,0,0.9) 100%);
+}
+
+.magical-shimmer {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(34, 211, 238, 0.2) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer-anim 3s infinite linear;
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+@keyframes shimmer-anim {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
