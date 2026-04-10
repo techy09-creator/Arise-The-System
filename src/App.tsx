@@ -153,41 +153,6 @@ export default function App() {
         )}
       </AnimatePresence>
 
-      {/* Header / Top HUD */}
-      <header className="fixed top-0 left-0 w-full z-50 px-4 py-3 flex justify-between items-center border-b border-white/5 bg-system-bg/98 backdrop-blur-md">
-        <div className="flex flex-col">
-          <span className="text-[7px] font-bold tracking-[0.2em] text-cyan-500/50 uppercase text-sharp">System Designation</span>
-          <span className="text-xs font-bold tracking-tight text-white text-sharp uppercase">{state.player.name}</span>
-        </div>
-        <div className="flex items-center gap-3">
-          <button 
-            onClick={() => navigate('DEBUG')}
-            className="text-[8px] font-mono text-cyan-500/20 hover:text-cyan-500/60 transition-colors uppercase"
-          >
-            [Debug Console]
-          </button>
-          <div className="flex flex-col items-end">
-            <span className="text-[7px] font-bold tracking-[0.2em] text-cyan-500/50 uppercase text-sharp">Rank Status</span>
-            <span className="text-xs font-bold tracking-tight text-cyan-400 text-sharp">{state.player.rank}</span>
-          </div>
-          <button 
-            onClick={() => {
-              triggerGlitch('high');
-              setShowProfileModal(true);
-            }}
-            className="w-8 h-8 rounded-sm border border-cyan-500/30 bg-cyan-500/5 flex items-center justify-center overflow-hidden hover:bg-cyan-500/20 transition-all active:scale-95 group"
-          >
-            {state.player.avatar ? (
-              <img src={state.player.avatar} alt="Avatar" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center bg-cyan-500/10 text-cyan-400 font-mono text-[10px] group-hover:text-cyan-300">
-                {(state.player.name || '??').substring(0, 2).toUpperCase()}
-              </div>
-            )}
-          </button>
-        </div>
-      </header>
-
       {/* Daily Reset Modal */}
       <AnimatePresence>
         {showResetModal && (
@@ -237,11 +202,18 @@ export default function App() {
       </AnimatePresence>
 
       {/* Main Content Area */}
-      <main className="pt-20 pb-24 px-4 h-screen overflow-y-auto custom-scrollbar relative z-10">
+      <main className="pt-16 pb-24 px-4 h-screen overflow-y-auto custom-scrollbar relative z-10">
         <ProjectionTransition isVisible={currentScreen === 'STATUS'}>
           <div className="space-y-4">
             {/* Level & XP */}
-            <HolographicPanel title="Core Status" showScanlines>
+            <HolographicPanel 
+              title="Core Status" 
+              showScanlines 
+              onClick={() => {
+                triggerGlitch('high');
+                setShowProfileModal(true);
+              }}
+            >
               <div className="flex items-center gap-4 mb-3">
                 <div className="w-16 h-16 rounded-sm border border-cyan-500/30 bg-cyan-500/5 overflow-hidden flex-shrink-0 shadow-[0_0_10px_rgba(34,211,238,0.1)]">
                   {state.player.avatar ? (

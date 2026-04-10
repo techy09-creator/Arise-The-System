@@ -8,6 +8,7 @@ interface HolographicPanelProps {
   title?: string;
   accent?: 'cyan' | 'red';
   showScanlines?: boolean;
+  onClick?: () => void;
 }
 
 export const HolographicPanel: React.FC<HolographicPanelProps> = ({ 
@@ -15,7 +16,8 @@ export const HolographicPanel: React.FC<HolographicPanelProps> = ({
   className, 
   title, 
   accent = 'cyan',
-  showScanlines = false 
+  showScanlines = false,
+  onClick
 }) => {
   const accentColor = accent === 'cyan' ? 'border-cyan-500/40' : 'border-red-500/40';
   const glowColor = accent === 'cyan' ? 'shadow-cyan-950/50' : 'shadow-red-950/50';
@@ -25,10 +27,12 @@ export const HolographicPanel: React.FC<HolographicPanelProps> = ({
       initial={{ opacity: 0, scale: 0.98, y: 5, rotateX: 2 }}
       animate={{ opacity: 1, scale: 1, y: 0, rotateX: 0 }}
       transition={{ type: "spring", stiffness: 120, damping: 20 }}
+      onClick={onClick}
       className={cn(
         "relative overflow-hidden hologram-glass rounded-sm p-3 perspective-1000 hologram-panel-glow",
         accentColor,
         glowColor,
+        onClick && "cursor-pointer hover:bg-white/[0.02] transition-colors active:scale-[0.99]",
         className
       )}
     >
