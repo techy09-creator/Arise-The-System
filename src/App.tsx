@@ -214,29 +214,40 @@ export default function App() {
                 setShowProfileModal(true);
               }}
             >
-              <div className="flex items-center gap-4 mb-3">
-                <div className="w-16 h-16 rounded-sm border border-cyan-500/30 bg-cyan-500/5 overflow-hidden flex-shrink-0 shadow-[0_0_10px_rgba(34,211,238,0.1)]">
-                  {state.player.avatar ? (
-                    <img src={state.player.avatar} alt="Avatar" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-cyan-500/10 text-cyan-400 font-mono text-2xl">
-                      {(state.player.name || '??').substring(0, 2).toUpperCase()}
-                    </div>
-                  )}
+              <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 mb-3">
+                <div className="flex flex-col items-center gap-1.5 flex-shrink-0">
+                  <div className="w-16 h-16 rounded-sm border border-cyan-500/30 bg-cyan-500/5 overflow-hidden shadow-[0_0_10px_rgba(34,211,238,0.1)]">
+                    {state.player.avatar ? (
+                      <img src={state.player.avatar} alt="Avatar" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-cyan-500/10 text-cyan-400 font-mono text-2xl">
+                        {(state.player.name || '??').substring(0, 2).toUpperCase()}
+                      </div>
+                    )}
+                  </div>
+                  <div className="text-[7px] font-mono tracking-tight uppercase whitespace-nowrap bg-black/40 px-1.5 py-0.5 rounded-sm border border-white/5">
+                    <span className="text-cyan-400">Player-ID : </span>
+                    <span className="text-white">{state.player.name}</span>
+                  </div>
                 </div>
-                <div className="flex-1 flex justify-between items-center">
+                
+                <div className="flex-1 w-full flex flex-row justify-between items-end sm:items-center gap-2">
                   <div className="flex flex-col">
-                    <div className="flex items-baseline gap-2">
-                      <span className="text-4xl font-bold text-white tracking-tighter text-sharp">LVL {state.player.level}</span>
-                      <span className={cn("px-2 py-0.5 border rounded-sm text-[10px] font-bold", getRankColor(state.player.rank))}>
-                        {state.player.rank}-RANK
+                    <div className="flex items-baseline gap-1.5">
+                      <span className="text-3xl sm:text-4xl font-bold text-white tracking-tighter text-sharp leading-none">LVL {state.player.level}</span>
+                      <span className={cn("px-1.5 py-0.5 border rounded-sm text-[8px] font-bold leading-none", getRankColor(state.player.rank))}>
+                        {state.player.rank}
                       </span>
                     </div>
-                    <span className="text-[9px] font-bold tracking-widest text-cyan-500/50 uppercase text-sharp">{state.player.title}</span>
+                    <span className="text-[8px] sm:text-[9px] font-bold tracking-widest text-cyan-500/50 uppercase text-sharp mt-1">{state.player.title}</span>
                   </div>
-                  <div className="text-right flex flex-col">
-                    <span className="text-[8px] font-bold text-cyan-500/30 uppercase text-sharp">XP PROGRESS</span>
-                    <span className="text-xl font-bold text-cyan-400 text-sharp">{Math.floor((state.player.xp / state.player.xpToNext) * 100)}%</span>
+                  
+                  <div className="text-right flex flex-col items-end">
+                    <span className="text-[7px] font-bold text-cyan-500/30 uppercase text-sharp mb-0.5">XP PROGRESS</span>
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-lg sm:text-xl font-bold text-cyan-400 text-sharp leading-none">{Math.floor((state.player.xp / state.player.xpToNext) * 100)}</span>
+                      <span className="text-[10px] font-bold text-cyan-400/50">%</span>
+                    </div>
                   </div>
                 </div>
               </div>
