@@ -122,7 +122,7 @@ export function useSystem() {
   });
 
   const [isGlitching, setIsGlitching] = useState(false);
-  const [activeOverlay, setActiveOverlay] = useState<'QUEST_ISSUED' | 'QUEST_CLEARED' | 'PENALTY' | null>(null);
+  const [activeOverlay, setActiveOverlay] = useState<'QUEST_ISSUED' | 'QUEST_CLEARED' | 'PENALTY' | 'HEALED' | null>(null);
 
   useEffect(() => {
     try {
@@ -139,10 +139,10 @@ export function useSystem() {
     setTimeout(() => setIsGlitching(false), intensity === 'high' ? 400 : 200);
   }, []);
 
-  const triggerOverlay = useCallback((type: 'QUEST_ISSUED' | 'QUEST_CLEARED' | 'PENALTY') => {
+  const triggerOverlay = useCallback((type: 'QUEST_ISSUED' | 'QUEST_CLEARED' | 'PENALTY' | 'HEALED') => {
     setActiveOverlay(type);
     // Only trigger glitch for penalty or issued, success has its own chime
-    if (type !== 'QUEST_CLEARED') {
+    if (type !== 'QUEST_CLEARED' && type !== 'HEALED') {
       triggerGlitch('medium');
     }
     setTimeout(() => setActiveOverlay(null), 3000);
@@ -335,12 +335,36 @@ export function useSystem() {
         disciplineScore: Math.min(100, prev.player.disciplineScore + (quest.isMandatory ? 2 : 1)),
       };
 
+      const updatedQuests = prev.quests.map(q => q.id === questId ? { ...q, status: 'COMPLETED', progress: q.target } : q);
+      const allDailyCompleted = updatedQuests.every(q => q.status === 'COMPLETED');
+      
+      let newInventory = [...prev.inventory];
+      let logs = [`Quest '${quest.title}' cleared. +${quest.rewards.xp} XP`, ...prev.logs];
+
+      if (allDailyCompleted) {
+        const potionIndex = newInventory.findIndex(i => i.name === "RECOVERY POTION");
+        if (potionIndex !== -1) {
+          newInventory[potionIndex] = { ...newInventory[potionIndex], count: newInventory[potionIndex].count + 1 };
+        } else {
+          newInventory.push({
+            id: `i_rec_${Date.now()}`,
+            name: "RECOVERY POTION",
+            description: "Instantly restores 50% Vitality.",
+            rarity: "COMMON",
+            effect: "VITALITY +50%",
+            count: 1
+          });
+        }
+        logs = ["ALL DAILY QUESTS CLEARED. RECOVERY POTION AWARDED.", ...logs];
+      }
+
       return {
         ...prev,
         player: newPlayer,
         attributes: newAttributes,
-        quests: prev.quests.map(q => q.id === questId ? { ...q, status: 'COMPLETED', progress: q.target } : q),
-        logs: [`Quest '${quest.title}' cleared. +${quest.rewards.xp} XP`, ...prev.logs],
+        quests: updatedQuests,
+        inventory: newInventory,
+        logs,
         xpHistory: [{ date: format(new Date(), 'MMM dd'), xp: quest.rewards.xp }, ...prev.xpHistory].slice(0, 7)
       };
     });
@@ -414,6 +438,66 @@ export function useSystem() {
     triggerGlitch('low');
   };
 
+  const useItem = useCallback((itemId: string) => {
+    setState(prev => {
+      const itemIndex = prev.inventory.findIndex(i => i.id === itemId);
+      if (itemIndex === -1) return prev;
+
+      const item = prev.inventory[itemIndex];
+      if (item.count <= 0) return prev;
+
+      // Apply effect
+      let newPlayer = { ...prev.player };
+      const effect = item.effect.toUpperCase();
+
+      if (effect.includes('VITALITY')) {
+        const match = effect.match(/\+(\d+)%/);
+        if (match) {
+          const percent = parseInt(match[1]);
+          newPlayer.vitality = Math.min(100, newPlayer.vitality + percent);
+        }
+      } else if (effect.includes('ENERGY')) {
+        const match = effect.match(/\+(\d+)%/);
+        if (match) {
+          const percent = parseInt(match[1]);
+          newPlayer.energy = Math.min(100, newPlayer.energy + percent);
+        }
+      } else if (effect.includes('FOCUS')) {
+        const match = effect.match(/\+(\d+)%/);
+        if (match) {
+          const percent = parseInt(match[1]);
+          newPlayer.focus = Math.min(100, newPlayer.focus + percent);
+        }
+      } else if (effect.includes('DISCIPLINE')) {
+        const match = effect.match(/\+(\d+)%/);
+        if (match) {
+          const percent = parseInt(match[1]);
+          newPlayer.discipline = Math.min(100, newPlayer.discipline + percent);
+        }
+      }
+
+      // Update inventory
+      const newInventory = [...prev.inventory];
+      if (item.count > 1) {
+        newInventory[itemIndex] = { ...item, count: item.count - 1 };
+      } else {
+        newInventory.splice(itemIndex, 1);
+      }
+
+      triggerGlitch('low');
+      if (effect.includes('VITALITY')) {
+        triggerOverlay('HEALED');
+      }
+
+      return {
+        ...prev,
+        player: newPlayer,
+        inventory: newInventory,
+        logs: [`Item used: ${item.name}. Effect applied.`, ...prev.logs]
+      };
+    });
+  }, [triggerGlitch]);
+
   return { 
     state, 
     isGlitching, 
@@ -427,6 +511,7 @@ export function useSystem() {
     seedDemoData,
     clearSystemData,
     clearLogs,
-    updateProfile
+    updateProfile,
+    useItem
   };
 }

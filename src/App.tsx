@@ -64,7 +64,8 @@ export default function App() {
     seedDemoData,
     clearSystemData,
     clearLogs,
-    updateProfile
+    updateProfile,
+    useItem
   } = useSystem();
   const [showResetModal, setShowResetModal] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
@@ -134,7 +135,9 @@ export default function App() {
             <div className="absolute inset-0 bg-black/80 backdrop-blur-md" />
             <div className={cn(
               "relative px-16 py-10 border-y-4 flex flex-col items-center",
-              activeOverlay === 'PENALTY' ? "border-red-500 bg-red-500/20 shadow-[0_0_50px_rgba(239,68,68,0.3)]" : "border-cyan-500 bg-cyan-500/20 shadow-[0_0_50px_rgba(34,211,238,0.3)]"
+              activeOverlay === 'PENALTY' ? "border-red-500 bg-red-500/20 shadow-[0_0_50px_rgba(239,68,68,0.3)]" : 
+              activeOverlay === 'HEALED' ? "border-green-500 bg-green-500/20 shadow-[0_0_50px_rgba(34,197,94,0.3)]" :
+              "border-cyan-500 bg-cyan-500/20 shadow-[0_0_50px_rgba(34,211,238,0.3)]"
             )}>
               <div className="absolute inset-0 scanlines opacity-50" />
               <motion.span 
@@ -142,7 +145,9 @@ export default function App() {
                 transition={{ duration: 0.15, repeat: Infinity }}
                 className={cn(
                   "text-5xl font-mono font-black tracking-tighter uppercase hologram-glow-cyan",
-                  activeOverlay === 'PENALTY' ? "text-red-500 hologram-glow-red" : "text-cyan-400"
+                  activeOverlay === 'PENALTY' ? "text-red-500 hologram-glow-red" : 
+                  activeOverlay === 'HEALED' ? "text-green-400 hologram-glow-green" :
+                  "text-cyan-400"
                 )}
               >
                 {activeOverlay.replace('_', ' ')}
@@ -236,7 +241,7 @@ export default function App() {
                     <div className="flex items-baseline gap-1.5">
                       <span className="text-3xl sm:text-4xl font-bold text-white tracking-tighter text-sharp leading-none">LVL {state.player.level}</span>
                       <span className={cn("px-1.5 py-0.5 border rounded-sm text-[8px] font-bold leading-none", getRankColor(state.player.rank))}>
-                        {state.player.rank}
+                        {state.player.rank} RANK
                       </span>
                     </div>
                     <span className="text-[8px] sm:text-[9px] font-bold tracking-widest text-cyan-500/50 uppercase text-sharp mt-1">{state.player.title}</span>
@@ -541,9 +546,7 @@ export default function App() {
                     <div className="flex justify-between items-center pt-1">
                       <span className="text-[9px] font-mono text-cyan-400/60">x{item.count}</span>
                       <button 
-                        onClick={() => {
-                          // Logic for using item would go here
-                        }}
+                        onClick={() => useItem(item.id)}
                         className="text-[8px] font-bold text-cyan-400 hover:text-white transition-colors"
                       >
                         USE
@@ -594,7 +597,7 @@ export default function App() {
                         )}>
                           <div className="flex justify-between items-center">
                             <div className="flex flex-col">
-                              <span className="text-[10px] font-mono font-bold text-white tracking-widest">{step.rank}-RANK</span>
+                              <span className="text-[10px] font-mono font-bold text-white tracking-widest">{step.rank} RANK</span>
                               <span className="text-[8px] font-mono text-cyan-500/40 uppercase">{step.label}</span>
                               <span className="text-[7px] font-mono text-white/20 mt-1">{step.criteria}</span>
                             </div>
@@ -988,7 +991,7 @@ function PlayerCardModal({ player, onSave, onClose }: { player: PlayerStats, onS
                 <div className="text-[8px] font-mono text-cyan-500/50 uppercase tracking-[0.3em]">Current Status</div>
                 <div className="text-xl font-black text-white tracking-tight uppercase">{name || 'UNDEFINED'}</div>
                 <div className="flex items-center justify-center gap-2 mt-1">
-                  <span className="text-[10px] font-mono text-cyan-400 px-2 py-0.5 border border-cyan-500/30 bg-cyan-500/10">RANK {player.rank}</span>
+                  <span className="text-[10px] font-mono text-cyan-400 px-2 py-0.5 border border-cyan-500/30 bg-cyan-500/10">{player.rank} RANK</span>
                   <span className="text-[10px] font-mono text-white/60">LVL {player.level}</span>
                 </div>
                 <div className="text-[8px] font-mono text-white/20 mt-2 tracking-widest uppercase">ID: {player.id}</div>
