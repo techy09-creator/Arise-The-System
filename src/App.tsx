@@ -21,7 +21,9 @@ import {
   Flame,
   CheckCircle2,
   Camera,
-  X
+  X,
+  ArrowUpDown,
+  ShieldCheck
 } from 'lucide-react';
 import { 
   LineChart, 
@@ -43,7 +45,7 @@ import { format, isSameDay } from 'date-fns';
 import { cn } from './lib/utils';
 import { useSystem } from './hooks/useSystem';
 import { Attribute, Rank, PlayerStats } from './types/system';
-import { HolographicPanel, GlitchButton, ProgressBar, SystemOverlay, ProjectionTransition } from './components/SystemUI';
+import { HolographicPanel, GlitchButton, ProgressBar, SystemOverlay, ProjectionTransition, GlitchProjection } from './components/SystemUI';
 import { SystemIntro } from './components/SystemIntro';
 
 type Screen = 'STATUS' | 'QUESTS' | 'ATTRIBUTES' | 'RANK' | 'ANALYTICS' | 'INVENTORY' | 'LOGS' | 'PENALTY' | 'JOURNEY' | 'DEBUG';
@@ -70,6 +72,35 @@ export default function App() {
   const [showResetModal, setShowResetModal] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showResetConfirmation, setShowResetConfirmation] = useState(false);
+  const [showQuestProtocol, setShowQuestProtocol] = useState(false);
+  const [showRecoveryProtocol, setShowRecoveryProtocol] = useState(false);
+  const [showRankProgress, setShowRankProgress] = useState(false);
+  const [questSort, setQuestSort] = useState<'TITLE' | 'REWARD' | 'DEADLINE'>('TITLE');
+
+  const sortedQuests = [...state.quests].sort((a, b) => {
+    if (questSort === 'TITLE') {
+      return a.title.localeCompare(b.title);
+    }
+    if (questSort === 'REWARD') {
+      // Primary sort by XP
+      if (b.rewards.xp !== a.rewards.xp) {
+        return b.rewards.xp - a.rewards.xp;
+      }
+      // Secondary sort by number of items
+      const aItems = a.rewards.items?.length || 0;
+      const bItems = b.rewards.items?.length || 0;
+      return bItems - aItems;
+    }
+    if (questSort === 'DEADLINE') {
+      if (!a.deadline && !b.deadline) return 0;
+      if (!a.deadline) return 1;
+      if (!b.deadline) return -1;
+      const dateA = new Date(a.deadline);
+      const dateB = new Date(b.deadline);
+      return dateA.getTime() - dateB.getTime();
+    }
+    return 0;
+  });
 
   // Check if reset is needed
   useEffect(() => {
@@ -208,6 +239,45 @@ export default function App() {
 
       {/* Main Content Area */}
       <main className="pt-16 pb-24 px-4 h-screen overflow-y-auto custom-scrollbar relative z-10">
+      <AnimatePresence>
+        {showQuestProtocol && (
+          <QuestProtocolModal onClose={() => {
+            triggerGlitch('low');
+            setShowQuestProtocol(false);
+          }} />
+        )}
+      </AnimatePresence>
+
+        <AnimatePresence>
+          {showRecoveryProtocol && (
+            <RecoveryProtocolModal 
+              level={state.player.level} 
+              onClose={() => {
+                triggerGlitch('low');
+                setShowRecoveryProtocol(false);
+              }} 
+              onAcknowledge={() => {
+                triggerGlitch('low');
+                setShowRecoveryProtocol(false);
+                triggerOverlay('HEALED');
+              }}
+            />
+          )}
+        </AnimatePresence>
+
+        <AnimatePresence>
+          {showRankProgress && (
+            <RankProgressModal 
+              rank={state.player.rank}
+              level={state.player.level}
+              onClose={() => {
+                triggerGlitch('low');
+                setShowRankProgress(false);
+              }}
+            />
+          )}
+        </AnimatePresence>
+
         <ProjectionTransition isVisible={currentScreen === 'STATUS'}>
           <div className="space-y-4">
             {/* Level & XP */}
@@ -332,12 +402,26 @@ export default function App() {
           <div className="space-y-4">
             <div className="flex justify-between items-center mb-2">
               <h2 className="text-xl font-bold text-white uppercase tracking-tighter text-sharp">Quest Log</h2>
-              <div className="px-2 py-1 bg-cyan-500/15 border border-cyan-500/30 rounded-sm text-[9px] font-bold text-cyan-400 text-sharp">
-                {state.quests.filter(q => q.status === 'IN_PROGRESS').length} ACTIVE
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-1 bg-white/5 border border-white/10 rounded-sm p-1">
+                  <ArrowUpDown className="w-3 h-3 text-cyan-400" />
+                  <select 
+                    value={questSort}
+                    onChange={(e) => setQuestSort(e.target.value as any)}
+                    className="bg-transparent text-[8px] font-bold text-white uppercase outline-none cursor-pointer"
+                  >
+                    <option value="TITLE" className="bg-system-bg">Title</option>
+                    <option value="REWARD" className="bg-system-bg">Reward</option>
+                    <option value="DEADLINE" className="bg-system-bg">Deadline</option>
+                  </select>
+                </div>
+                <div className="px-2 py-1 bg-cyan-500/15 border border-cyan-500/30 rounded-sm text-[9px] font-bold text-cyan-400 text-sharp">
+                  {state.quests.filter(q => q.status === 'IN_PROGRESS').length} ACTIVE
+                </div>
               </div>
             </div>
 
-            {state.quests.map(quest => (
+            {sortedQuests.map(quest => (
               <HolographicPanel 
                 key={quest.id} 
                 title={quest.type} 
@@ -355,6 +439,12 @@ export default function App() {
                   </div>
                   <p className="text-[10px] text-white/70 leading-tight">{quest.description}</p>
                   
+                  <div className="flex justify-between items-center mb-1">
+                    <p className="text-[10px] text-white/70">{quest.status === 'COMPLETED' ? 'COMPLETED' : 'CURRENT OBJECTIVE'}</p>
+                    <span className="text-[10px] font-mono font-bold text-cyan-400">
+                      {quest.progress} / {quest.target} {quest.title.includes('RUNNING') ? 'KM' : 'REPS'}
+                    </span>
+                  </div>
                   <ProgressBar 
                     value={quest.progress} 
                     max={quest.target} 
@@ -546,7 +636,12 @@ export default function App() {
                     <div className="flex justify-between items-center pt-1">
                       <span className="text-[9px] font-mono text-cyan-400/60">x{item.count}</span>
                       <button 
-                        onClick={() => useItem(item.id)}
+                        onClick={() => {
+                          useItem(item.id);
+                          if (item.name.toUpperCase().includes('RECOVERY')) {
+                            setShowRecoveryProtocol(true);
+                          }
+                        }}
                         className="text-[8px] font-bold text-cyan-400 hover:text-white transition-colors"
                       >
                         USE
@@ -589,12 +684,15 @@ export default function App() {
                           "bg-system-bg border-white/10"
                         )} />
                         
-                        <div className={cn(
-                          "p-2 border rounded-sm transition-all",
-                          isCurrent ? "border-cyan-500/40 bg-cyan-500/5 shadow-[0_0_10px_rgba(34,211,238,0.1)]" :
-                          isCompleted ? "border-white/5 bg-white/5 opacity-50" :
-                          "border-white/5 bg-transparent opacity-20"
-                        )}>
+                        <div 
+                          className={cn(
+                            "p-2 border rounded-sm transition-all relative overflow-hidden",
+                            isCurrent ? "border-cyan-500/40 bg-cyan-500/5 shadow-[0_0_10px_rgba(34,211,238,0.1)] cursor-pointer hover:bg-cyan-500/10" :
+                            isCompleted ? "border-white/5 bg-white/5 opacity-50" :
+                            "border-white/5 bg-transparent opacity-20"
+                          )}
+                          onClick={() => isCurrent && setShowRankProgress(true)}
+                        >
                           <div className="flex justify-between items-center">
                             <div className="flex flex-col">
                               <span className="text-[10px] font-mono font-bold text-white tracking-widest">{step.rank} RANK</span>
@@ -635,6 +733,12 @@ export default function App() {
                   </GlitchButton>
                   <GlitchButton variant="ghost" fullWidth onClick={() => navigate('LOGS')}>
                     Access System Logs
+                  </GlitchButton>
+                  <GlitchButton variant="ghost" fullWidth onClick={() => {
+                    triggerGlitch('low');
+                    setShowQuestProtocol(true);
+                  }}>
+                    Quest System Protocol
                   </GlitchButton>
                 </div>
               </div>
@@ -783,32 +887,34 @@ function ResetConfirmationModal({ onConfirm, onCancel }: { onConfirm: () => void
       exit={{ opacity: 0 }}
       className="fixed inset-0 z-[300] flex items-center justify-center p-4 bg-black/90 backdrop-blur-xl"
     >
-      <HolographicPanel title="CRITICAL SYSTEM OVERRIDE" className="w-full max-w-sm p-6 space-y-6 border-red-500/30">
-        <div className="space-y-2">
-          <div className="flex items-center gap-2 text-red-500">
-            <AlertTriangle className="w-5 h-5" />
-            <h2 className="text-xl font-bold uppercase tracking-tighter text-sharp">Wipe Protocol</h2>
+      <GlitchProjection className="w-full max-w-sm">
+        <HolographicPanel title="CRITICAL SYSTEM OVERRIDE" className="p-6 space-y-6 border-red-500/30">
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 text-red-500">
+              <AlertTriangle className="w-5 h-5" />
+              <h2 className="text-xl font-bold uppercase tracking-tighter text-sharp">Wipe Protocol</h2>
+            </div>
+            <p className="text-[10px] text-red-500/60 uppercase tracking-widest leading-relaxed">
+              Warning: This action will permanently delete all player progress, levels, ranks, and logs. This cannot be undone.
+            </p>
           </div>
-          <p className="text-[10px] text-red-500/60 uppercase tracking-widest leading-relaxed">
-            Warning: This action will permanently delete all player progress, levels, ranks, and logs. This cannot be undone.
-          </p>
-        </div>
 
-        <div className="p-4 bg-red-500/5 border border-red-500/20 rounded-sm space-y-3">
-          <p className="text-xs font-mono text-red-400/80 leading-relaxed">
-            Are you sure you want to reset all player data and restore system defaults?
-          </p>
-        </div>
+          <div className="p-4 bg-red-500/5 border border-red-500/20 rounded-sm space-y-3">
+            <p className="text-xs font-mono text-red-400/80 leading-relaxed">
+              Are you sure you want to reset all player data and restore system defaults?
+            </p>
+          </div>
 
-        <div className="flex gap-3">
-          <GlitchButton variant="ghost" className="flex-1" onClick={onCancel}>
-            CANCEL
-          </GlitchButton>
-          <GlitchButton variant="danger" className="flex-1" onClick={onConfirm}>
-            RESET DATA
-          </GlitchButton>
-        </div>
-      </HolographicPanel>
+          <div className="flex gap-3">
+            <GlitchButton variant="ghost" className="flex-1" onClick={onCancel}>
+              CANCEL
+            </GlitchButton>
+            <GlitchButton variant="danger" className="flex-1" onClick={onConfirm}>
+              RESET DATA
+            </GlitchButton>
+          </div>
+        </HolographicPanel>
+      </GlitchProjection>
     </motion.div>
   );
 }
@@ -827,92 +933,94 @@ function DailyResetModal({ onComplete }: { onComplete: (inputs: any) => void }) 
       exit={{ opacity: 0 }}
       className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/90 backdrop-blur-xl"
     >
-      <HolographicPanel title="DAILY SYSTEM SYNC" className="w-full max-w-sm p-6 space-y-6">
-        <div className="space-y-1">
-          <h2 className="text-xl font-bold text-white uppercase tracking-tighter text-sharp">Readiness Input</h2>
-          <p className="text-[10px] text-cyan-500/60 uppercase tracking-widest">Calibrating daily parameters...</p>
-        </div>
+      <GlitchProjection className="w-full max-w-sm">
+        <HolographicPanel title="DAILY SYSTEM SYNC" className="p-6 space-y-6">
+          <div className="space-y-1">
+            <h2 className="text-xl font-bold text-white uppercase tracking-tighter text-sharp">Readiness Input</h2>
+            <p className="text-[10px] text-cyan-500/60 uppercase tracking-widest">Calibrating daily parameters...</p>
+          </div>
 
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <div className="flex justify-between items-center">
-              <span className="text-[10px] font-bold text-white/60 uppercase flex items-center gap-2">
-                <Moon className="w-3 h-3" /> Sleep Duration
-              </span>
-              <span className="text-sm font-bold text-cyan-400">{sleep}h</span>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <span className="text-[10px] font-bold text-white/60 uppercase flex items-center gap-2">
+                  <Moon className="w-3 h-3" /> Sleep Duration
+                </span>
+                <span className="text-sm font-bold text-cyan-400">{sleep}h</span>
+              </div>
+              <input 
+                type="range" min="4" max="12" step="0.5" value={sleep} 
+                onChange={(e) => setSleep(parseFloat(e.target.value))}
+                className="w-full h-1 bg-white/10 rounded-lg appearance-none cursor-pointer accent-cyan-500"
+              />
             </div>
-            <input 
-              type="range" min="4" max="12" step="0.5" value={sleep} 
-              onChange={(e) => setSleep(parseFloat(e.target.value))}
-              className="w-full h-1 bg-white/10 rounded-lg appearance-none cursor-pointer accent-cyan-500"
-            />
-          </div>
 
-          <div className="space-y-2">
-            <div className="flex justify-between items-center">
-              <span className="text-[10px] font-bold text-white/60 uppercase flex items-center gap-2">
-                <Battery className="w-3 h-3" /> Energy Level
-              </span>
-              <span className="text-sm font-bold text-cyan-400">{energy}/10</span>
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <span className="text-[10px] font-bold text-white/60 uppercase flex items-center gap-2">
+                  <Battery className="w-3 h-3" /> Energy Level
+                </span>
+                <span className="text-sm font-bold text-cyan-400">{energy}/10</span>
+              </div>
+              <input 
+                type="range" min="1" max="10" step="1" value={energy} 
+                onChange={(e) => setEnergy(parseInt(e.target.value))}
+                className="w-full h-1 bg-white/10 rounded-lg appearance-none cursor-pointer accent-cyan-500"
+              />
             </div>
-            <input 
-              type="range" min="1" max="10" step="1" value={energy} 
-              onChange={(e) => setEnergy(parseInt(e.target.value))}
-              className="w-full h-1 bg-white/10 rounded-lg appearance-none cursor-pointer accent-cyan-500"
-            />
-          </div>
 
-          <div className="space-y-2">
-            <div className="flex justify-between items-center">
-              <span className="text-[10px] font-bold text-white/60 uppercase flex items-center gap-2">
-                <Flame className="w-3 h-3" /> Fatigue/Soreness
-              </span>
-              <span className="text-sm font-bold text-red-400">{fatigue}/10</span>
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <span className="text-[10px] font-bold text-white/60 uppercase flex items-center gap-2">
+                  <Flame className="w-3 h-3" /> Fatigue/Soreness
+                </span>
+                <span className="text-sm font-bold text-red-400">{fatigue}/10</span>
+              </div>
+              <input 
+                type="range" min="1" max="10" step="1" value={fatigue} 
+                onChange={(e) => setFatigue(parseInt(e.target.value))}
+                className="w-full h-1 bg-white/10 rounded-lg appearance-none cursor-pointer accent-red-500"
+              />
             </div>
-            <input 
-              type="range" min="1" max="10" step="1" value={fatigue} 
-              onChange={(e) => setFatigue(parseInt(e.target.value))}
-              className="w-full h-1 bg-white/10 rounded-lg appearance-none cursor-pointer accent-red-500"
-            />
-          </div>
 
-          <div className="space-y-2">
-            <div className="flex justify-between items-center">
-              <span className="text-[10px] font-bold text-white/60 uppercase flex items-center gap-2">
-                <Activity className="w-3 h-3" /> Yesterday Load
-              </span>
-              <span className="text-sm font-bold text-cyan-400">{yesterdayLoad}/10</span>
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <span className="text-[10px] font-bold text-white/60 uppercase flex items-center gap-2">
+                  <Activity className="w-3 h-3" /> Yesterday Load
+                </span>
+                <span className="text-sm font-bold text-cyan-400">{yesterdayLoad}/10</span>
+              </div>
+              <input 
+                type="range" min="1" max="10" step="1" value={yesterdayLoad} 
+                onChange={(e) => setYesterdayLoad(parseInt(e.target.value))}
+                className="w-full h-1 bg-white/10 rounded-lg appearance-none cursor-pointer accent-cyan-500"
+              />
             </div>
-            <input 
-              type="range" min="1" max="10" step="1" value={yesterdayLoad} 
-              onChange={(e) => setYesterdayLoad(parseInt(e.target.value))}
-              className="w-full h-1 bg-white/10 rounded-lg appearance-none cursor-pointer accent-cyan-500"
-            />
+
+            <div className="flex items-center justify-between p-3 border border-white/5 bg-white/5 rounded-sm">
+              <span className="text-[10px] font-bold text-white/60 uppercase">Recovery Actions Performed?</span>
+              <button 
+                onClick={() => {
+                  setRecovery(!recovery);
+                }}
+                className={cn(
+                  "w-10 h-5 rounded-full transition-all relative",
+                  recovery ? "bg-cyan-500" : "bg-white/10"
+                )}
+              >
+                <div className={cn(
+                  "absolute top-1 w-3 h-3 rounded-full bg-white transition-all",
+                  recovery ? "left-6" : "left-1"
+                )} />
+              </button>
+            </div>
           </div>
 
-          <div className="flex items-center justify-between p-3 border border-white/5 bg-white/5 rounded-sm">
-            <span className="text-[10px] font-bold text-white/60 uppercase">Recovery Actions Performed?</span>
-            <button 
-              onClick={() => {
-                setRecovery(!recovery);
-              }}
-              className={cn(
-                "w-10 h-5 rounded-full transition-all relative",
-                recovery ? "bg-cyan-500" : "bg-white/10"
-              )}
-            >
-              <div className={cn(
-                "absolute top-1 w-3 h-3 rounded-full bg-white transition-all",
-                recovery ? "left-6" : "left-1"
-              )} />
-            </button>
-          </div>
-        </div>
-
-        <GlitchButton fullWidth onClick={() => onComplete({ sleep, energy, fatigue, yesterdayLoad, recovery })}>
-          Initialize Daily Protocol
-        </GlitchButton>
-      </HolographicPanel>
+          <GlitchButton fullWidth onClick={() => onComplete({ sleep, energy, fatigue, yesterdayLoad, recovery })}>
+            Initialize Daily Protocol
+          </GlitchButton>
+        </HolographicPanel>
+      </GlitchProjection>
     </motion.div>
   );
 }
@@ -954,12 +1062,7 @@ function PlayerCardModal({ player, onSave, onClose }: { player: PlayerStats, onS
       exit={{ opacity: 0 }}
       className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/90 backdrop-blur-xl"
     >
-      <motion.div
-        initial={{ scale: 0.9, y: 20 }}
-        animate={{ scale: 1, y: 0 }}
-        exit={{ scale: 0.9, y: 20 }}
-        className="max-w-md w-full relative"
-      >
+      <GlitchProjection className="max-w-md w-full relative">
         <button 
           onClick={onClose}
           className="absolute -top-12 right-0 p-2 text-white/40 hover:text-white transition-colors"
@@ -1048,7 +1151,225 @@ function PlayerCardModal({ player, onSave, onClose }: { player: PlayerStats, onS
             </div>
           </div>
         </HolographicPanel>
-      </motion.div>
+      </GlitchProjection>
+    </motion.div>
+  );
+}
+
+function QuestProtocolModal({ onClose }: { onClose: () => void }) {
+  const questData = [
+    { rank: 'E', lvl: '1', push: '5', sit: '5', sq: '5', run: '1K' },
+    { rank: 'D', lvl: '21', push: '24', sit: '24', sq: '24', run: '2K' },
+    { rank: 'C', lvl: '41', push: '43', sit: '43', sq: '43', run: '4K' },
+    { rank: 'B', lvl: '61', push: '62', sit: '62', sq: '62', run: '6K' },
+    { rank: 'A', lvl: '81', push: '81', sit: '81', sq: '81', run: '8K' },
+    { rank: 'S', lvl: '100+', push: '100', sit: '100', sq: '100', run: '10K' },
+  ];
+
+  return (
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-[400] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md"
+    >
+      <GlitchProjection className="w-full max-w-md">
+        <HolographicPanel title="QUEST SYSTEM PROTOCOL" className="p-6 bg-slate-900/50" showScanlines>
+          <div className="space-y-4">
+            <div className="flex justify-between items-center border-b border-cyan-500/20 pb-2">
+              <div className="flex items-center gap-2">
+                <ScrollText className="w-4 h-4 text-cyan-400" />
+                <span className="text-xs font-bold text-white uppercase tracking-tighter">Mission Parameter Matrix</span>
+              </div>
+              <button onClick={onClose} className="p-1 hover:bg-white/10 rounded-full transition-colors">
+                <X className="w-4 h-4 text-white/50" />
+              </button>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-[10px] font-mono text-left border-collapse">
+                <thead>
+                  <tr className="border-b border-white/10">
+                    <th className="py-2 px-1 text-cyan-500/60 uppercase">Rank</th>
+                    <th className="py-2 px-1 text-cyan-500/60 uppercase">Lvl</th>
+                    <th className="py-2 px-1 text-cyan-500/60 uppercase text-center">Push/Sit/Sq</th>
+                    <th className="py-2 px-1 text-cyan-500/60 uppercase text-right">Run</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/5">
+                  {questData.map((row) => (
+                    <tr key={row.rank} className="hover:bg-cyan-500/5 transition-colors">
+                      <td className="py-2 px-1 font-bold text-white">{row.rank} Rank</td>
+                      <td className="py-2 px-1 text-white/60">{row.lvl}</td>
+                      <td className="py-2 px-1 text-center font-bold text-cyan-400 hologram-glow-cyan">{row.push}</td>
+                      <td className="py-2 px-1 text-right font-bold text-yellow-500">{row.run}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <p className="text-[8px] font-mono text-white/40 uppercase tracking-widest leading-relaxed">
+              * Objective targets scale linearly between rank thresholds. 
+              Individual readiness scores apply a ±20% protocol adjustment.
+            </p>
+
+            <GlitchButton fullWidth onClick={onClose} className="mt-4">
+              CLOSE INTERFACE
+            </GlitchButton>
+          </div>
+        </HolographicPanel>
+      </GlitchProjection>
+    </motion.div>
+  );
+}
+
+function RecoveryProtocolModal({ level, onClose, onAcknowledge }: { level: number; onClose: () => void; onAcknowledge: () => void }) {
+  const getProtocol = (lvl: number) => {
+    // ... logic remains same
+    if (lvl <= 20) return { 
+      food: "Standard Nutrition: Lean Protein, Brown Rice, Steamed Greens.", 
+      rest: "8 Hours Optimized Sleep Cycle.",
+      accent: "text-green-400"
+    };
+    if (lvl <= 40) return { 
+      food: "Enhanced Bio-Fuel: Chicken Breast, Sweet Potato, Omega-3 Supplements.", 
+      rest: "7.5 Hours Rest + 20min Tactical Nap.",
+      accent: "text-cyan-400"
+    };
+    if (lvl <= 60) return { 
+      food: "Advanced Metabolic Kit: Grass-fed Beef, Complex Carbs, BCAAs.", 
+      rest: "7 Hours Deep Sleep + Post-Workout Bio-Sync.",
+      accent: "text-blue-400"
+    };
+    if (lvl <= 80) return { 
+      food: "Elite Performance Matrix: Nutrient-Dense Superfoods, Electrolyte Infusion.", 
+      rest: "6.5 Hours Compressed Rest Protocol.",
+      accent: "text-purple-400"
+    };
+    return { 
+      food: "Sovereign Essence Protocol: Strategic Synthesized Macronutrients.", 
+      rest: "5 Hours Hyper-Recovery Meditation.",
+      accent: "text-yellow-400"
+    };
+  };
+
+  const protocol = getProtocol(level);
+
+  return (
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-[400] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md"
+    >
+      <GlitchProjection className="w-full max-w-sm">
+        <HolographicPanel title="RECOVERY PROTOCOL ANALYST" className="p-6 bg-slate-900/50" showScanlines accent="cyan">
+          <div className="space-y-6">
+            <div className="flex justify-between items-center border-b border-cyan-500/20 pb-2">
+              <div className="flex items-center gap-2">
+                <Activity className="w-4 h-4 text-green-400" />
+                <span className="text-xs font-bold text-white uppercase tracking-tighter">Bio-Metric Optimization</span>
+              </div>
+              <button onClick={onClose} className="p-1 hover:bg-white/10 rounded-full transition-colors">
+                <X className="w-4 h-4 text-white/50" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div className="space-y-1">
+                <span className="text-[8px] font-mono text-cyan-500/60 uppercase tracking-widest">Recommended Nutritional Intake</span>
+                <p className={cn("text-xs font-mono font-bold leading-relaxed", protocol.accent)}>
+                  {protocol.food}
+                </p>
+              </div>
+
+              <div className="space-y-1 py-2 border-y border-white/5">
+                <span className="text-[8px] font-mono text-cyan-500/60 uppercase tracking-widest">Restoration Schedule</span>
+                <p className="text-xs font-mono text-white/80 font-bold">
+                  {protocol.rest}
+                </p>
+              </div>
+
+              <div className="bg-cyan-500/5 p-3 border border-cyan-500/10 rounded-sm">
+                <div className="flex items-center gap-2 mb-1">
+                  <ShieldCheck className="w-3 h-3 text-cyan-400" />
+                  <span className="text-[9px] font-bold text-cyan-400 uppercase">System Status</span>
+                </div>
+                <p className="text-[10px] text-white/60 font-mono italic">
+                  "Optimal recovery detected. Vitality levels recalibrating to the current host level ({level}). Proceed with designated rest protocols."
+                </p>
+              </div>
+            </div>
+
+            <GlitchButton fullWidth onClick={onAcknowledge} className="mt-2">
+              ACKNOWLEDGE PROTOCOL
+            </GlitchButton>
+          </div>
+        </HolographicPanel>
+      </GlitchProjection>
+    </motion.div>
+  );
+}
+
+function RankProgressModal({ rank, level, onClose }: { rank: Rank; level: number; onClose: () => void }) {
+  const thresholds: Record<Rank, { min: number; next: number; title: string }> = {
+    'E': { min: 1, next: 21, title: 'Ascension to D-Rank' },
+    'D': { min: 21, next: 41, title: 'Ascension to C-Rank' },
+    'C': { min: 41, next: 61, title: 'Ascension to B-Rank' },
+    'B': { min: 61, next: 81, title: 'Ascension to A-Rank' },
+    'A': { min: 81, next: 101, title: 'Ascension to S-Rank' },
+    'S': { min: 101, next: 101, title: 'Sovereign Status' }
+  };
+
+  const current = thresholds[rank];
+  const progress = rank === 'S' || level >= current.next ? 100 : Math.min(100, Math.max(0, ((level - current.min) / (current.next - current.min)) * 100));
+  const levelsLeft = Math.max(0, current.next - level);
+
+  return (
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-[400] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md"
+    >
+      <GlitchProjection className="w-full max-w-sm">
+        <HolographicPanel title="RANK ASCENSION TRACKER" className="p-6 bg-slate-900/50" showScanlines accent="cyan">
+          <div className="space-y-6">
+             <div className="text-center space-y-2">
+               <span className="text-[10px] font-mono text-cyan-500/60 uppercase tracking-widest">{current.title}</span>
+               <div className="text-4xl font-bold text-white tracking-tighter text-sharp">
+                 {rank === 'S' ? 'MAX' : `${Math.floor(progress)}%`}
+               </div>
+             </div>
+
+             <div className="space-y-2">
+               <div className="flex justify-between text-[8px] font-mono text-white/40 uppercase">
+                 <span>Current: LVL {level}</span>
+                 <span>Target: LVL {current.next}</span>
+               </div>
+               <ProgressBar value={progress} max={100} color="cyan" />
+             </div>
+
+             <div className="bg-cyan-500/5 p-4 border border-cyan-500/10 rounded-sm space-y-3">
+               <div className="flex items-center gap-2">
+                 <Target className="w-3 h-3 text-cyan-400" />
+                 <span className="text-[10px] font-bold text-cyan-400 uppercase">Requirement Analysis</span>
+               </div>
+               <p className="text-[10px] text-white/80 font-mono leading-relaxed">
+                 {rank === 'S' ? 
+                   "Host has attained Sovereign Status. No further rank ascension parameters identified." :
+                   `System requires ${levelsLeft} more level gain${levelsLeft !== 1 ? 's' : ''} to initialize the rank re-evaluation protocol.`
+                 }
+               </p>
+             </div>
+
+             <GlitchButton fullWidth onClick={onClose}>
+               RETURN TO COMMAND
+             </GlitchButton>
+          </div>
+        </HolographicPanel>
+      </GlitchProjection>
     </motion.div>
   );
 }

@@ -66,11 +66,17 @@ export function useSystem() {
       return quests;
     }
 
+    const calculateTaskTarget = (base: number, max: number, currentLevel: number) => {
+      const cappedLevel = Math.min(100, currentLevel);
+      const progress = (cappedLevel - 1) / 99;
+      return Math.max(base, Math.floor(base + (max - base) * progress));
+    };
+
     const baseQuests = [
-      { key: 'pushups', title: "PUSH-UPS", target: 100, stat: 'strength' },
-      { key: 'situps', title: "SIT-UPS", target: 100, stat: 'strength' },
-      { key: 'squats', title: "SQUATS", target: 100, stat: 'strength' },
-      { key: 'running', title: "RUNNING", target: 10, stat: 'endurance' },
+      { key: 'pushups', title: "PUSH-UPS", target: calculateTaskTarget(5, 100, level), stat: 'strength' },
+      { key: 'situps', title: "SIT-UPS", target: calculateTaskTarget(5, 100, level), stat: 'strength' },
+      { key: 'squats', title: "SQUATS", target: calculateTaskTarget(5, 100, level), stat: 'strength' },
+      { key: 'running', title: "RUNNING", target: calculateTaskTarget(1, 10, level), stat: 'endurance' },
     ];
 
     baseQuests.forEach((bq, i) => {
@@ -78,7 +84,7 @@ export function useSystem() {
       quests.push({
         id: `q_sjw_${i}_${timestamp}`,
         title: `DAILY QUEST: ${bq.title}`,
-        description: `Complete ${adjustedTarget} ${bq.title.toLowerCase()} to build ${bq.stat}.`,
+        description: `Protocol demands ${adjustedTarget} units of ${bq.title.toLowerCase()} to optimize ${bq.stat}.`,
         type: 'DAILY',
         status: 'IN_PROGRESS',
         isMandatory: true,
@@ -312,19 +318,19 @@ export function useSystem() {
         newXPToNext = calculateXPToNext(newLevel);
       }
 
-        const newAttributes = { ...prev.attributes };
-        if (quest.rewards.stats) {
-          Object.entries(quest.rewards.stats).forEach(([key, val]) => {
-            if (newAttributes[key]) {
-              const newValue = (newAttributes[key].value || 0) + val;
-              newAttributes[key] = {
-                ...newAttributes[key],
-                value: newValue,
-                growth: [...(newAttributes[key].growth || []), newValue].slice(-10)
-              };
-            }
-          });
-        }
+      const newAttributes = { ...prev.attributes };
+      if (quest.rewards.stats) {
+        Object.entries(quest.rewards.stats).forEach(([key, val]) => {
+          if (newAttributes[key]) {
+            const newValue = (newAttributes[key].value || 0) + val;
+            newAttributes[key] = {
+              ...newAttributes[key],
+              value: newValue,
+              growth: [...(newAttributes[key].growth || []), newValue].slice(-10)
+            };
+          }
+        });
+      }
 
       const newPlayer = {
         ...prev.player,
@@ -335,8 +341,41 @@ export function useSystem() {
         disciplineScore: Math.min(100, prev.player.disciplineScore + (quest.isMandatory ? 2 : 1)),
       };
 
-      const updatedQuests = prev.quests.map(q => q.id === questId ? { ...q, status: 'COMPLETED', progress: q.target } : q);
-      const allDailyCompleted = updatedQuests.every(q => q.status === 'COMPLETED');
+      // Recalculate targets for other daily quests if level changed
+      let updatedQuests = prev.quests.map(q => q.id === questId ? { ...q, status: 'COMPLETED', progress: q.target } : q);
+      
+      if (newLevel > prev.player.level) {
+        const calculateTaskTarget = (base: number, max: number, currentLevel: number) => {
+          const cappedLevel = Math.min(100, currentLevel);
+          const progress = (cappedLevel - 1) / 99;
+          return Math.max(base, Math.floor(base + (max - base) * progress));
+        };
+
+        updatedQuests = updatedQuests.map(q => {
+          if (q.status === 'IN_PROGRESS' && q.type === 'DAILY') {
+            let baseVal = 5;
+            let maxVal = 100;
+            if (q.title.includes('RUNNING')) {
+              baseVal = 1;
+              maxVal = 10;
+            }
+            
+            const newBaseTarget = calculateTaskTarget(baseVal, maxVal, newLevel);
+            // Re-apply diffMult logic (approximate as 1.0 for simplicity or we'd need to track it)
+            // But we can just use the new level component.
+            const newTarget = newBaseTarget; 
+            
+            return {
+              ...q,
+              target: newTarget,
+              description: `Protocol demands ${newTarget} units of ${q.title.replace('DAILY QUEST: ', '').toLowerCase()} to optimize system attributes.`
+            };
+          }
+          return q;
+        });
+      }
+
+      const allDailyCompleted = updatedQuests.filter(q => q.type === 'DAILY').every(q => q.status === 'COMPLETED');
       
       let newInventory = [...prev.inventory];
       let logs = [`Quest '${quest.title}' cleared. +${quest.rewards.xp} XP`, ...prev.logs];
@@ -485,9 +524,6 @@ export function useSystem() {
       }
 
       triggerGlitch('low');
-      if (effect.includes('VITALITY')) {
-        triggerOverlay('HEALED');
-      }
 
       return {
         ...prev,

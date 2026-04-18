@@ -160,21 +160,40 @@ export const ProjectionTransition: React.FC<{ children: React.ReactNode; isVisib
     <AnimatePresence mode="wait">
       {isVisible && (
         <motion.div
-          initial={{ opacity: 0, scaleY: 0.95, x: -2, filter: 'blur(4px)' }}
+          initial={{ opacity: 0, scaleY: 0.9, x: -5, filter: 'blur(8px)' }}
           animate={{ 
-            opacity: [0, 0.8, 0.9, 1],
-            scaleY: [0.95, 1.02, 0.98, 1],
-            x: [0, -2, 2, 0],
-            filter: ['blur(4px)', 'blur(2px)', 'blur(1px)', 'blur(0px)']
+            opacity: [0, 1],
+            scaleY: [0.9, 1.03, 0.98, 1],
+            x: [0, -4, 4, -2, 2, 0],
+            filter: ['blur(8px)', 'blur(0px)']
           }}
-          exit={{ opacity: 0, scaleY: 0.95, x: 2, filter: 'blur(4px)' }}
+          exit={{ opacity: 0, scaleY: 0.9, x: 5, filter: 'blur(8px)' }}
           transition={{ duration: 0.3, ease: "easeInOut" }}
-          className="projection-reveal"
+          className="projection-reveal overflow-visible"
         >
           {children}
         </motion.div>
       )}
     </AnimatePresence>
+  );
+};
+
+export const GlitchProjection: React.FC<{ children: React.ReactNode; className?: string }> = ({ children, className }) => {
+  return (
+    <motion.div
+      initial={{ opacity: 0, scaleY: 0.9, x: -5, filter: 'blur(8px)' }}
+      animate={{ 
+        opacity: [0, 1],
+        scaleY: [0.9, 1.03, 0.98, 1],
+        x: [0, -4, 4, -2, 2, 0],
+        filter: ['blur(8px)', 'blur(0px)']
+      }}
+      exit={{ opacity: 0, scaleY: 0.9, x: 5, filter: 'blur(8px)' }}
+      transition={{ duration: 0.3, ease: "easeInOut" }}
+      className={className}
+    >
+      {children}
+    </motion.div>
   );
 };
 
