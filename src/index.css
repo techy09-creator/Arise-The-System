@@ -1,22 +1,50 @@
 @import "tailwindcss";
 
-@theme {
+:root {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
   
-  --color-system-bg: #020617;
-  --color-system-cyan: #22d3ee;
+  --system-bg: #020617;
+  --system-accent: 34, 211, 238; /* cyan-400 */
+  --system-accent-dim: 6, 182, 212; /* cyan-500 */
+  --system-accent-bright: 103, 232, 249; /* cyan-300 */
+  --system-accent-hex: #22d3ee;
+  --system-glow: rgba(34, 211, 238, 0.5);
+  --system-border: rgba(34, 211, 238, 0.4);
+}
+
+.penalty-mode {
+  --system-accent: 239, 68, 68; /* red-500 */
+  --system-accent-dim: 185, 28, 28; /* red-700 */
+  --system-accent-bright: 252, 165, 165; /* red-300 */
+  --system-accent-hex: #ef4444;
+  --system-glow: rgba(239, 68, 68, 0.5);
+  --system-border: rgba(239, 68, 68, 0.4);
+}
+
+@theme {
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+  
+  --color-system-bg: var(--system-bg);
+  --color-system-cyan: rgb(var(--system-accent));
   --color-system-red: #ef4444;
   --color-system-glass: rgba(4, 7, 18, 0.92);
-  --color-system-border: rgba(34, 211, 238, 0.4);
+  --color-system-border: var(--system-border);
+
+  /* Override standard cyan colors with our dynamic variables */
+  --color-cyan-300: rgb(var(--system-accent-bright));
+  --color-cyan-400: rgb(var(--system-accent));
+  --color-cyan-500: rgb(var(--system-accent-dim));
+  --color-cyan-950: rgba(var(--system-accent-dim), 0.1);
 }
 
 @layer base {
   body {
     @apply bg-system-bg text-slate-300 font-sans overflow-hidden selection:bg-cyan-500/30;
     background-image: 
-      radial-gradient(circle at 50% 50%, rgba(34, 211, 238, 0.03) 0%, transparent 70%),
-      linear-gradient(90deg, rgba(34, 211, 238, 0.01) 1px, transparent 1px);
+      radial-gradient(circle at 50% 50%, rgba(var(--system-accent), 0.03) 0%, transparent 70%),
+      linear-gradient(90deg, rgba(var(--system-accent), 0.01) 1px, transparent 1px);
     background-size: 100% 100%, 60px 60px;
   }
 }
@@ -29,12 +57,13 @@
 
 @layer components {
   .hologram-glass {
-    @apply backdrop-blur-xl border border-system-border bg-system-glass shadow-[0_0_30px_rgba(34,211,238,0.15)];
-    background-image: linear-gradient(135deg, rgba(34, 211, 238, 0.05) 0%, transparent 100%);
+    @apply backdrop-blur-xl border border-system-border bg-system-glass;
+    box-shadow: 0 0 30px rgba(var(--system-accent), 0.15);
+    background-image: linear-gradient(135deg, rgba(var(--system-accent), 0.05) 0%, transparent 100%);
   }
 
   .hologram-glow-cyan {
-    text-shadow: 0 0 10px rgba(34, 211, 238, 0.5), 0 0 20px rgba(34, 211, 238, 0.2);
+    text-shadow: 0 0 10px rgba(var(--system-accent), 0.5), 0 0 20px rgba(var(--system-accent), 0.2);
   }
 
   .hologram-glow-red {
@@ -56,7 +85,7 @@
   }
 
   .hologram-panel-glow {
-    box-shadow: 0 0 15px rgba(34, 211, 238, 0.1), inset 0 0 10px rgba(34, 211, 238, 0.05);
+    box-shadow: 0 0 15px rgba(var(--system-accent), 0.1), inset 0 0 10px rgba(var(--system-accent), 0.05);
   }
 
   .projection-reveal {
@@ -80,7 +109,7 @@
   .energy-pulse {
     position: absolute;
     border-radius: 50%;
-    background: radial-gradient(circle, rgba(34, 211, 238, 0.8) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(var(--system-accent), 0.8) 0%, transparent 70%);
     transform: scale(0);
     animation: energy-pulse-anim 0.6s ease-out forwards;
     pointer-events: none;

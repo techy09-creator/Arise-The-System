@@ -51,7 +51,7 @@ export const HolographicPanel: React.FC<HolographicPanelProps> = ({
             <motion.div 
               animate={{ opacity: [0.3, 1, 0.3] }}
               transition={{ duration: 2, repeat: Infinity }}
-              className={cn("w-1 h-1 rounded-full", accent === 'cyan' ? "bg-cyan-500 shadow-[0_0_5px_#22d3ee]" : "bg-red-500 shadow-[0_0_5px_#ef4444]")} 
+              className={cn("w-1 h-1 rounded-full", accent === 'cyan' ? "bg-cyan-500 shadow-[0_0_5px_var(--system-accent-hex)]" : "bg-red-500 shadow-[0_0_5px_#ef4444]")} 
             />
             <div className="w-1 h-1 rounded-full bg-white/20" />
           </div>
@@ -218,7 +218,7 @@ export const ProgressBar: React.FC<{
         <motion.div 
           initial={{ width: 0 }}
           animate={{ width: `${percentage}%` }}
-          className={cn("absolute inset-y-0 left-0 shadow-[0_0_10px_rgba(34,211,238,0.5)]", color)}
+          className={cn("absolute inset-y-0 left-0 shadow-[0_0_10px_rgba(var(--system-accent),0.5)]", color)}
         />
         {showSegments && (
           <div className="absolute inset-0 flex justify-between pointer-events-none">

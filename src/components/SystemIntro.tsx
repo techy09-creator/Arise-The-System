@@ -65,7 +65,7 @@ export function SystemIntro({ onComplete, playerName }: SystemIntroProps) {
       className="fixed inset-0 z-[1000] bg-black flex items-center justify-center overflow-hidden"
     >
       {/* 1. VOID & AMBIENT LAYERS */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(6,182,212,0.05)_0%,transparent_70%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(var(--system-accent-dim),0.05)_0%,transparent_70%)]" />
       
       {/* Shadow Smoke Layer */}
       <motion.div
@@ -129,7 +129,7 @@ export function SystemIntro({ onComplete, playerName }: SystemIntroProps) {
             }}
             className="w-full h-full pointer-events-none"
           >
-            <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-[0_0_30px_rgba(34,211,238,0.4)]">
+            <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-[0_0_30px_rgba(var(--system-accent),0.4)]">
               {/* Complex Arcane Glyph */}
               <motion.circle
                 cx="50" cy="50" r="48"

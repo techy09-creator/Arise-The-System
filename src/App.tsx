@@ -131,7 +131,7 @@ export default function App() {
     <div className={cn(
       "relative min-h-screen w-full bg-system-bg text-slate-300 font-sans overflow-hidden transition-all duration-300",
       isGlitching && "glitch-active",
-      state.penaltyActive && "border-4 border-red-500/20"
+      state.penaltyActive && "penalty-mode"
     )}>
       <AnimatePresence mode="wait">
         {isInitializing && (
@@ -527,8 +527,8 @@ export default function App() {
                       A: Math.round(a?.value || 0), 
                       fullMark: 100 
                     }))}>
-                      <PolarGrid stroke="rgba(34, 211, 238, 0.2)" />
-                      <PolarAngleAxis dataKey="subject" tick={{ fill: 'rgba(34, 211, 238, 0.6)', fontSize: 10 }} />
+                      <PolarGrid stroke="rgba(var(--system-accent), 0.2)" />
+                      <PolarAngleAxis dataKey="subject" tick={{ fill: 'rgba(var(--system-accent), 0.6)', fontSize: 10 }} />
                       <Radar
                         name="Player"
                         dataKey="A"
@@ -560,18 +560,18 @@ export default function App() {
                         <AreaChart data={state.journey.slice().reverse()}>
                           <defs>
                             <linearGradient id="colorReadiness" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="5%" stopColor="#22d3ee" stopOpacity={0.3}/>
-                              <stop offset="95%" stopColor="#22d3ee" stopOpacity={0}/>
+                              <stop offset="5%" stopColor="var(--system-accent-hex)" stopOpacity={0.3}/>
+                              <stop offset="95%" stopColor="var(--system-accent-hex)" stopOpacity={0}/>
                             </linearGradient>
                           </defs>
                           <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
                           <XAxis dataKey="date" tick={{ fill: 'rgba(255,255,255,0.4)', fontSize: 8 }} axisLine={false} tickLine={false} />
                           <YAxis hide domain={[0, 100]} />
                           <Tooltip 
-                            contentStyle={{ backgroundColor: '#020617', border: '1px solid rgba(34, 211, 238, 0.2)', fontSize: '10px' }}
-                            itemStyle={{ color: '#22d3ee' }}
+                            contentStyle={{ backgroundColor: '#020617', border: '1px solid var(--system-border)', fontSize: '10px' }}
+                            itemStyle={{ color: 'var(--system-accent-hex)' }}
                           />
-                          <Area type="monotone" dataKey="readiness" stroke="#22d3ee" fillOpacity={1} fill="url(#colorReadiness)" />
+                          <Area type="monotone" dataKey="readiness" stroke="var(--system-accent-hex)" fillOpacity={1} fill="url(#colorReadiness)" />
                         </AreaChart>
                       </ResponsiveContainer>
                     ) : (
@@ -856,10 +856,13 @@ export default function App() {
 
       {/* Global CSS for custom scrollbar and other tweaks */}
       <style dangerouslySetInnerHTML={{ __html: `
-        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(34, 211, 238, 0.2); border-radius: 2px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(34, 211, 238, 0.4); }
+        .custom-scrollbar {
+          scrollbar-width: none;
+          -ms-overflow-style: none;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
       `}} />
     </div>
   );
@@ -884,7 +887,7 @@ function NavButton({ active, onClick, icon, label }: { active: boolean, onClick:
       {active && (
         <motion.div 
           layoutId="nav-active"
-          className="absolute -bottom-1 w-3 h-0.5 bg-cyan-500 shadow-[0_0_5px_#22d3ee]"
+          className="absolute -bottom-1 w-3 h-0.5 bg-cyan-500 shadow-[0_0_5px_var(--system-accent-hex)]"
         />
       )}
     </button>
