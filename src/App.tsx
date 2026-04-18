@@ -183,7 +183,9 @@ export default function App() {
               >
                 {activeOverlay.replace('_', ' ')}
               </motion.span>
-              <span className="text-xs font-mono tracking-[0.8em] text-white/80 mt-4 flicker">SYSTEM AUTHORITY: GRANTED</span>
+              <span className="text-xs font-mono tracking-[0.8em] text-white/80 mt-4 flicker">
+                {activeOverlay === 'LEVEL_UP' ? "EVOLUTION PROTOCOL: INITIALIZED" : "SYSTEM AUTHORITY: GRANTED"}
+              </span>
             </div>
           </motion.div>
         )}

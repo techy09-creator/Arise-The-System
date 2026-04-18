@@ -145,7 +145,7 @@ export function useSystem() {
     setTimeout(() => setIsGlitching(false), intensity === 'high' ? 400 : 200);
   }, []);
 
-  const triggerOverlay = useCallback((type: 'QUEST_ISSUED' | 'QUEST_CLEARED' | 'PENALTY' | 'HEALED') => {
+  const triggerOverlay = useCallback((type: 'QUEST_ISSUED' | 'QUEST_CLEARED' | 'PENALTY' | 'HEALED' | 'LEVEL_UP') => {
     setActiveOverlay(type);
     // Only trigger glitch for penalty or issued, success has its own chime
     if (type !== 'QUEST_CLEARED' && type !== 'HEALED') {
@@ -345,6 +345,7 @@ export function useSystem() {
       let updatedQuests = prev.quests.map(q => q.id === questId ? { ...q, status: 'COMPLETED', progress: q.target } : q);
       
       if (newLevel > prev.player.level) {
+        triggerOverlay('LEVEL_UP');
         const calculateTaskTarget = (base: number, max: number, currentLevel: number) => {
           const cappedLevel = Math.min(100, currentLevel);
           const progress = (cappedLevel - 1) / 99;
