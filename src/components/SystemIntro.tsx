@@ -26,8 +26,8 @@ export function SystemIntro({ onComplete, playerName }: SystemIntroProps) {
   useEffect(() => {
     // Cinematic Timings (Total ~12s for first launch, ~4s for repeat)
     const timings = isFirstLaunch 
-      ? [800, 2000, 4500, 7500, 9000, 10000] 
-      : [200, 600, 1200, 2000, 2800, 3500];
+      ? [600, 1500, 3000, 5000, 6500, 7500] 
+      : [100, 400, 800, 1400, 2000, 2500];
 
     if (prefersReducedMotion) {
       onComplete();
@@ -123,9 +123,9 @@ export function SystemIntro({ onComplete, playerName }: SystemIntroProps) {
               scale: phase >= 2 ? (phase >= 5 ? 1.5 : 1) : 0.8,
             }}
             transition={{ 
-              duration: 2, 
+              duration: 1, 
               ease: "easeOut",
-              scale: { duration: 8, ease: "linear" } // Slow cinematic zoom
+              scale: { duration: 6, ease: "linear" } // Slightly faster cinematic zoom
             }}
             className="w-full h-full pointer-events-none"
           >
@@ -139,7 +139,7 @@ export function SystemIntro({ onComplete, playerName }: SystemIntroProps) {
                 className="text-cyan-500/40"
                 initial={{ pathLength: 0 }}
                 animate={{ pathLength: phase >= 2 ? 1 : 0 }}
-                transition={{ duration: 1 }}
+                transition={{ duration: 0.5 }}
               />
               <motion.path
                 d="M50 5 L95 50 L50 95 L50 50 Z" // Adjusted path to be more "centered"
@@ -149,7 +149,7 @@ export function SystemIntro({ onComplete, playerName }: SystemIntroProps) {
                 className="text-cyan-400/20"
                 initial={{ pathLength: 0 }}
                 animate={{ pathLength: phase >= 2 ? 1 : 0 }}
-                transition={{ duration: 1.5, delay: 0.3 }}
+                transition={{ duration: 0.7, delay: 0.2 }}
               />
               {/* Rotating Rune Ring */}
               <motion.circle
@@ -172,7 +172,7 @@ export function SystemIntro({ onComplete, playerName }: SystemIntroProps) {
               opacity: phase === 2 ? [0, 0.5, 0] : 0,
               scale: phase === 2 ? [0.8, 1.5] : 0.8,
             }}
-            transition={{ duration: 1.5, ease: "easeOut" }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
             className="absolute inset-0 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"
           />
         </div>
