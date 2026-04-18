@@ -460,14 +460,16 @@ export default function App() {
                     </div>
                     {quest.status === 'IN_PROGRESS' && (
                       <div className="flex gap-2">
-                        <GlitchButton 
-                          variant="ghost" 
-                          size="sm" 
-                          className="h-6 px-2 py-0 text-[8px]" 
-                          onClick={() => updateQuestProgress(quest.id, Math.ceil(quest.target / 10))}
-                        >
-                          +10%
-                        </GlitchButton>
+                        {state.player.rank === 'S' && (
+                          <GlitchButton 
+                            variant="ghost" 
+                            size="sm" 
+                            className="h-6 px-2 py-0 text-[8px]" 
+                            onClick={() => updateQuestProgress(quest.id, Math.ceil(quest.target / 10))}
+                          >
+                            +10
+                          </GlitchButton>
+                        )}
                         <GlitchButton size="sm" className="h-6 px-3 py-0 text-[10px]" onClick={() => completeQuest(quest.id)}>
                           Claim
                         </GlitchButton>
