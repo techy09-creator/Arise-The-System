@@ -291,44 +291,52 @@ export default function App() {
                 setShowProfileModal(true);
               }}
             >
-              <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 mb-3">
-                <div className="flex flex-col items-center gap-1.5 flex-shrink-0">
-                  <div className="w-16 h-16 rounded-sm border border-cyan-500/30 bg-cyan-500/5 overflow-hidden shadow-[0_0_10px_rgba(34,211,238,0.1)]">
+              <div className="flex flex-row items-center gap-4 mb-4">
+                <div className="relative shrink-0">
+                  <div className="w-20 h-20 rounded-sm border-2 border-cyan-500/30 bg-cyan-500/5 p-1 overflow-hidden shadow-[0_0_15px_rgba(34,211,238,0.2)]">
                     {state.player.avatar ? (
                       <img src={state.player.avatar} alt="Avatar" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-cyan-500/10 text-cyan-400 font-mono text-2xl">
+                      <div className="w-full h-full flex items-center justify-center bg-cyan-500/10 text-cyan-400 font-mono text-3xl">
                         {(state.player.name || '??').substring(0, 2).toUpperCase()}
                       </div>
                     )}
                   </div>
-                  <div className="text-[7px] font-mono tracking-tight uppercase whitespace-nowrap bg-black/40 px-1.5 py-0.5 rounded-sm border border-white/5">
-                    <span className="text-cyan-400">Player-ID : </span>
-                    <span className="text-white">{state.player.name}</span>
-                  </div>
                 </div>
                 
-                <div className="flex-1 w-full flex flex-row justify-between items-end sm:items-center gap-2">
+                <div className="flex-1 min-w-0">
                   <div className="flex flex-col">
-                    <div className="flex items-baseline gap-1.5">
-                      <span className="text-3xl sm:text-4xl font-bold text-white tracking-tighter text-sharp leading-none">LVL {state.player.level}</span>
-                      <span className={cn("px-1.5 py-0.5 border rounded-sm text-[8px] font-bold leading-none", getRankColor(state.player.rank))}>
-                        {state.player.rank} RANK
-                      </span>
+                    <div className="text-[8px] font-mono text-cyan-500/50 uppercase tracking-[0.3em] mb-0.5">Authenticated Trace</div>
+                    <div className="text-2xl sm:text-4xl font-black text-white tracking-tighter uppercase leading-none truncate mb-2">{state.player.name}</div>
+                    
+                    <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-xs sm:text-sm font-bold text-white/90 font-mono tracking-tight uppercase whitespace-nowrap">
+                          LVL {state.player.level}
+                        </span>
+                        <span className={cn("px-1.5 py-0.5 border rounded-sm text-[8px] font-bold leading-none", getRankColor(state.player.rank))}>
+                          {state.player.rank} RANK
+                        </span>
+                      </div>
+                      <div className="h-3 w-px bg-white/10 hidden sm:block" />
+                      <span className="hidden sm:block text-[9px] font-bold tracking-widest text-cyan-500/40 uppercase text-sharp">{state.player.title}</span>
                     </div>
-                    <span className="text-[8px] sm:text-[9px] font-bold tracking-widest text-cyan-500/50 uppercase text-sharp mt-1">{state.player.title}</span>
                   </div>
-                  
-                  <div className="text-right flex flex-col items-end">
-                    <span className="text-[7px] font-bold text-cyan-500/30 uppercase text-sharp mb-0.5">XP PROGRESS</span>
-                    <div className="flex items-baseline gap-1">
-                      <span className="text-lg sm:text-xl font-bold text-cyan-400 text-sharp leading-none">{Math.floor((state.player.xp / state.player.xpToNext) * 100)}</span>
-                      <span className="text-[10px] font-bold text-cyan-400/50">%</span>
-                    </div>
+                </div>
+
+                <div className="shrink-0 text-right hidden sm:flex flex-col items-end">
+                  <span className="text-[7px] font-bold text-cyan-500/30 uppercase text-sharp mb-0.5">XP RATIO</span>
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-xl font-bold text-cyan-400 text-sharp leading-none">{Math.floor((state.player.xp / state.player.xpToNext) * 100)}</span>
+                    <span className="text-[10px] font-bold text-cyan-400/50">%</span>
                   </div>
                 </div>
               </div>
-              <ProgressBar value={state.player.xp} max={state.player.xpToNext} />
+              <ProgressBar 
+                value={state.player.xp} 
+                max={state.player.xpToNext} 
+                label="XP PROGRESSION"
+              />
             </HolographicPanel>
 
             {/* Core Metrics Grid */}
@@ -1077,31 +1085,33 @@ function PlayerCardModal({ player, onSave, onClose }: { player: PlayerStats, onS
         <HolographicPanel title="PLAYER IDENTITY CARD" showScanlines>
           <div className="space-y-6">
             {/* Profile Preview */}
-            <div className="flex flex-col items-center gap-4 py-4">
-              <div className="relative group">
-                <div className="w-24 h-24 rounded-sm border-2 border-cyan-500/30 bg-cyan-500/5 p-1 overflow-hidden shadow-[0_0_20px_rgba(34,211,238,0.2)]">
+            <div className="flex flex-col sm:flex-row items-center gap-6 py-6 px-2">
+              <div className="relative group shrink-0">
+                <div className="w-32 h-32 rounded-sm border-2 border-cyan-500/30 bg-cyan-500/5 p-1 overflow-hidden shadow-[0_0_30px_rgba(34,211,238,0.2)]">
                   {avatar ? (
                     <img src={avatar} alt="Preview" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-cyan-500/10 text-cyan-400 font-mono text-3xl">
+                    <div className="w-full h-full flex items-center justify-center bg-cyan-500/10 text-cyan-400 font-mono text-4xl">
                       {(name || '??').substring(0, 2).toUpperCase()}
                     </div>
                   )}
                 </div>
-                <label className="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+                <label className="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer z-10">
                   <Camera className="w-6 h-6 text-cyan-400" />
                   <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} />
                 </label>
               </div>
               
-              <div className="text-center">
-                <div className="text-[8px] font-mono text-cyan-500/50 uppercase tracking-[0.3em]">Current Status</div>
-                <div className="text-xl font-black text-white tracking-tight uppercase">{name || 'UNDEFINED'}</div>
-                <div className="flex items-center justify-center gap-2 mt-1">
-                  <span className="text-[10px] font-mono text-cyan-400 px-2 py-0.5 border border-cyan-500/30 bg-cyan-500/10">{player.rank} RANK</span>
-                  <span className="text-[10px] font-mono text-white/60">LVL {player.level}</span>
+              <div className="flex-1 text-center sm:text-left space-y-2">
+                <div>
+                  <div className="text-[10px] font-mono text-cyan-500/50 uppercase tracking-[0.4em] mb-1">Current Status</div>
+                  <div className="text-3xl sm:text-4xl font-black text-white tracking-tighter uppercase leading-none">{name || 'UNDEFINED'}</div>
                 </div>
-                <div className="text-[8px] font-mono text-white/20 mt-2 tracking-widest uppercase">ID: {player.id}</div>
+                <div className="flex items-center justify-center sm:justify-start gap-3 pt-1">
+                  <span className="text-[11px] font-mono text-cyan-400 px-2 py-0.5 border border-cyan-500/30 bg-cyan-500/10">{player.rank} RANK</span>
+                  <span className="text-[11px] font-mono text-white/60">LVL {player.level}</span>
+                </div>
+                <div className="text-[9px] font-mono text-white/20 mt-3 tracking-widest uppercase">SYST-AUTH-ID: {player.id}</div>
               </div>
             </div>
 
