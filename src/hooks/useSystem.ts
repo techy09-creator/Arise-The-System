@@ -55,13 +55,13 @@ export function useSystem() {
       quests.push({
         id: `q_pen_${timestamp}`,
         title: "PENALTY: RESTORATION PROTOCOL",
-        description: "Complete 200 push-ups, 200 sit-ups, 200 squats, and a 15km run to lift the penalty.",
+        description: "Complete 200 push-ups, 200 sit-ups, 200 squats, 200 crunches, and a 15km run to lift the penalty.",
         type: 'PENALTY',
         status: 'IN_PROGRESS',
         isMandatory: true,
         rewards: { xp: 500, stats: { discipline: 2 } },
         progress: 0,
-        target: 715,
+        target: 915,
       });
       return quests;
     }
@@ -76,6 +76,7 @@ export function useSystem() {
       { key: 'pushups', title: "PUSH-UPS", target: calculateTaskTarget(5, 100, level), stat: 'strength' },
       { key: 'situps', title: "SIT-UPS", target: calculateTaskTarget(5, 100, level), stat: 'strength' },
       { key: 'squats', title: "SQUATS", target: calculateTaskTarget(5, 100, level), stat: 'strength' },
+      { key: 'crunches', title: "CRUNCHES", target: calculateTaskTarget(5, 100, level), stat: 'strength' },
       { key: 'running', title: "RUNNING", target: calculateTaskTarget(1, 10, level), stat: 'endurance' },
     ];
 
