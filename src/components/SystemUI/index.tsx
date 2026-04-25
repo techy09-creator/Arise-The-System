@@ -28,6 +28,7 @@ export const HolographicPanel: React.FC<HolographicPanelProps> = ({
       animate={{ opacity: 1, scale: 1, y: 0, rotateX: 0 }}
       transition={{ type: "spring", stiffness: 120, damping: 20 }}
       onClick={onClick}
+      style={{ willChange: "transform, opacity" }}
       className={cn(
         "relative overflow-hidden hologram-glass rounded-sm p-3 perspective-1000 hologram-panel-glow",
         accentColor,
@@ -119,6 +120,7 @@ export const GlitchButton: React.FC<GlitchButtonProps> = ({
     <motion.button
       whileTap={{ scale: 0.96 }}
       onClick={handleClick}
+      style={{ willChange: "transform, opacity" }}
       className={cn(
         "relative font-bold uppercase tracking-widest border transition-all duration-200 active:scale-95 overflow-hidden text-sharp",
         variants[variant],

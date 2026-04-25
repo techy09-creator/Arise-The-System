@@ -174,6 +174,7 @@ export default function App() {
               <motion.span 
                 animate={{ opacity: [1, 0.4, 1], scale: [1, 1.02, 1] }}
                 transition={{ duration: 0.15, repeat: Infinity }}
+                style={{ display: 'inline-block', willChange: "transform, opacity" }}
                 className={cn(
                   "text-5xl font-mono font-black tracking-tighter uppercase hologram-glow-cyan",
                   activeOverlay === 'PENALTY' ? "text-red-500 hologram-glow-red" : 

@@ -62,6 +62,7 @@ export function SystemIntro({ onComplete, playerName }: SystemIntroProps) {
         ],
       }}
       transition={{ duration: 0.5, ease: "easeInOut" }}
+      style={{ willChange: "transform, opacity, filter" }}
       className="fixed inset-0 z-[1000] bg-black flex items-center justify-center overflow-hidden"
     >
       {/* 1. VOID & AMBIENT LAYERS */}
