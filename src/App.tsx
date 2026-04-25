@@ -47,6 +47,7 @@ import { useSystem } from './hooks/useSystem';
 import { Attribute, Rank, PlayerStats } from './types/system';
 import { HolographicPanel, GlitchButton, ProgressBar, SystemOverlay, ProjectionTransition, GlitchProjection } from './components/SystemUI';
 import { SystemIntro } from './components/SystemIntro';
+import { CountdownTimer } from './components/CountdownTimer';
 
 type Screen = 'STATUS' | 'QUESTS' | 'ATTRIBUTES' | 'RANK' | 'ANALYTICS' | 'INVENTORY' | 'LOGS' | 'PENALTY' | 'JOURNEY' | 'DEBUG';
 
@@ -385,6 +386,9 @@ export default function App() {
             </div>
 
             {/* Quick Quests */}
+            <div className="flex justify-center pt-2">
+              <CountdownTimer />
+            </div>
             <HolographicPanel title="Active Quests">
               <div className="space-y-2">
                 {state.quests.filter(q => q.status === 'IN_PROGRESS').length > 0 ? (
@@ -412,9 +416,12 @@ export default function App() {
 
         <ProjectionTransition isVisible={currentScreen === 'QUESTS'}>
           <div className="space-y-4">
-            <div className="flex justify-between items-center mb-2">
-              <h2 className="text-xl font-bold text-white uppercase tracking-tighter text-sharp">Quest Log</h2>
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-2">
+              <div className="flex flex-col">
+                <h2 className="text-xl font-bold text-white uppercase tracking-tighter text-sharp leading-none">Quest Log</h2>
+              </div>
               <div className="flex items-center gap-3">
+                <CountdownTimer />
                 <div className="flex items-center gap-1 bg-white/5 border border-white/10 rounded-sm p-1">
                   <ArrowUpDown className="w-3 h-3 text-cyan-400" />
                   <select 
