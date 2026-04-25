@@ -161,6 +161,7 @@ export default function App() {
             initial={{ opacity: 0, scale: 1.5, filter: 'blur(20px)' }}
             animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
             exit={{ opacity: 0, scale: 0.8, filter: 'blur(20px)' }}
+            style={{ willChange: "transform, opacity, filter" }}
             className="fixed inset-0 z-[100] flex items-center justify-center pointer-events-none"
           >
             <div className="absolute inset-0 bg-black/80 backdrop-blur-md" />
@@ -873,8 +874,9 @@ function NavButton({ active, onClick, icon, label }: { active: boolean, onClick:
   return (
     <button 
       onClick={onClick}
+      style={{ willChange: "transform, color" }}
       className={cn(
-        "flex flex-col items-center gap-1 transition-all duration-300 relative",
+        "flex flex-col items-center gap-1 transition-all duration-200 relative",
         active ? "text-cyan-400" : "text-slate-500 hover:text-slate-300"
       )}
     >
@@ -901,6 +903,7 @@ function ResetConfirmationModal({ onConfirm, onCancel }: { onConfirm: () => void
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
+      style={{ willChange: "opacity" }}
       className="fixed inset-0 z-[300] flex items-center justify-center p-4 bg-black/90 backdrop-blur-xl"
     >
       <GlitchProjection className="w-full max-w-sm">
@@ -941,12 +944,13 @@ function DailyResetModal({ onComplete }: { onComplete: (inputs: any) => void }) 
   const [fatigue, setFatigue] = useState(3);
   const [yesterdayLoad, setYesterdayLoad] = useState(5);
   const [recovery, setRecovery] = useState(false);
-
+  
   return (
     <motion.div 
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
+      style={{ willChange: "opacity" }}
       className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/90 backdrop-blur-xl"
     >
       <GlitchProjection className="w-full max-w-sm">
@@ -1076,6 +1080,7 @@ function PlayerCardModal({ player, onSave, onClose }: { player: PlayerStats, onS
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
+      style={{ willChange: "opacity" }}
       className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/90 backdrop-blur-xl"
     >
       <GlitchProjection className="max-w-md w-full relative">
@@ -1189,6 +1194,7 @@ function QuestProtocolModal({ onClose }: { onClose: () => void }) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
+      style={{ willChange: "opacity" }}
       className="fixed inset-0 z-[400] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md"
     >
       <GlitchProjection className="w-full max-w-md">
@@ -1279,6 +1285,7 @@ function RecoveryProtocolModal({ level, onClose, onAcknowledge }: { level: numbe
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
+      style={{ willChange: "opacity" }}
       className="fixed inset-0 z-[400] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md"
     >
       <GlitchProjection className="w-full max-w-sm">
@@ -1349,6 +1356,7 @@ function RankProgressModal({ rank, level, onClose }: { rank: Rank; level: number
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
+      style={{ willChange: "opacity" }}
       className="fixed inset-0 z-[400] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md"
     >
       <GlitchProjection className="w-full max-w-sm">

@@ -171,6 +171,7 @@ export const ProjectionTransition: React.FC<{ children: React.ReactNode; isVisib
           }}
           exit={{ opacity: 0, scaleY: 0.9, x: 5, filter: 'blur(8px)' }}
           transition={{ duration: 0.3, ease: "easeInOut" }}
+          style={{ willChange: "transform, opacity, filter" }}
           className="projection-reveal overflow-visible"
         >
           {children}
@@ -192,6 +193,7 @@ export const GlitchProjection: React.FC<{ children: React.ReactNode; className?:
       }}
       exit={{ opacity: 0, scaleY: 0.9, x: 5, filter: 'blur(8px)' }}
       transition={{ duration: 0.3, ease: "easeInOut" }}
+      style={{ willChange: "transform, opacity, filter" }}
       className={className}
     >
       {children}
@@ -220,6 +222,7 @@ export const ProgressBar: React.FC<{
         <motion.div 
           initial={{ width: 0 }}
           animate={{ width: `${percentage}%` }}
+          style={{ willChange: "width" }}
           className={cn("absolute inset-y-0 left-0 shadow-[0_0_10px_rgba(var(--system-accent),0.5)]", color)}
         />
         {showSegments && (

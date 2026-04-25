@@ -24,10 +24,8 @@ export function SystemIntro({ onComplete, playerName }: SystemIntroProps) {
   []);
 
   useEffect(() => {
-    // Cinematic Timings (Total ~12s for first launch, ~4s for repeat)
-    const timings = isFirstLaunch 
-      ? [600, 1500, 3000, 5000, 6500, 7500] 
-      : [100, 400, 800, 1400, 2000, 2500];
+    // Ultra-Fast Tactical Intro (Exactly 2s)
+    const timings = [100, 250, 400, 600, 1600, 2000];
 
     if (prefersReducedMotion) {
       onComplete();
@@ -35,9 +33,9 @@ export function SystemIntro({ onComplete, playerName }: SystemIntroProps) {
     }
 
     const timers = [
-      setTimeout(() => setPhase(1), timings[0]),  // Energy Stir / Fragments
+      setTimeout(() => setPhase(1), timings[0]),  // Energy Stir
       setTimeout(() => setPhase(2), timings[1]),  // Character Revelation
-      setTimeout(() => setPhase(3), timings[2]),  // System Awakening / Glyph
+      setTimeout(() => setPhase(3), timings[2]),  // System Awakening
       setTimeout(() => setPhase(4), timings[3]),  // Title Reveal
       setTimeout(() => setPhase(5), timings[4]),  // Final Pulse
       setTimeout(() => onComplete(), timings[5])  // Transition to App
@@ -76,6 +74,7 @@ export function SystemIntro({ onComplete, playerName }: SystemIntroProps) {
           rotate: [0, 5, 0]
         }}
         transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
+        style={{ willChange: "transform, opacity" }}
         className="absolute inset-[-20%] bg-[radial-gradient(circle_at_center,rgba(0,0,0,0.8)_0%,transparent_60%)] opacity-40 blur-3xl"
       />
 
@@ -103,9 +102,12 @@ export function SystemIntro({ onComplete, playerName }: SystemIntroProps) {
                   x: (Math.random() - 0.5) * window.innerWidth,
                   y: (Math.random() - 0.5) * window.innerHeight,
                 }}
-                transition={{ duration: 4, delay: i * 0.2, repeat: Infinity }}
+                transition={{ duration: 1.5, delay: i * 0.1, repeat: Infinity }}
+                style={{ 
+                  willChange: "transform, opacity",
+                  transform: `rotate(${Math.random() * 360}deg)` 
+                }}
                 className="absolute w-32 h-1 bg-cyan-500/20 blur-md"
-                style={{ transform: `rotate(${Math.random() * 360}deg)` }}
               />
             ))}
           </div>
@@ -116,20 +118,21 @@ export function SystemIntro({ onComplete, playerName }: SystemIntroProps) {
       <div className="relative z-10 flex items-center justify-center w-full h-full">
         {/* Circle Container */}
         <div className="relative w-64 h-64 md:w-80 md:h-80 flex items-center justify-center">
-          <motion.div
-            initial={{ opacity: 0, rotate: -45, scale: 0.8 }}
-            animate={{ 
-              opacity: phase >= 2 ? 1 : 0,
-              rotate: phase >= 2 ? 0 : -45,
-              scale: phase >= 2 ? (phase >= 5 ? 1.5 : 1) : 0.8,
-            }}
-            transition={{ 
-              duration: 1, 
-              ease: "easeOut",
-              scale: { duration: 6, ease: "linear" } // Slightly faster cinematic zoom
-            }}
-            className="w-full h-full pointer-events-none"
-          >
+            <motion.div
+              initial={{ opacity: 0, rotate: -45, scale: 0.8 }}
+              animate={{ 
+                opacity: phase >= 2 ? 1 : 0,
+                rotate: phase >= 2 ? 0 : -45,
+                scale: phase >= 2 ? (phase >= 5 ? 1.5 : 1) : 0.8,
+              }}
+              transition={{ 
+                duration: 0.8, 
+                ease: "easeOut",
+                scale: { duration: 2, ease: "linear" } // 2s synced zoom
+              }}
+              style={{ willChange: "transform, opacity" }}
+              className="w-full h-full pointer-events-none"
+            >
             <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-[0_0_30px_rgba(var(--system-accent),0.4)]">
               {/* Complex Arcane Glyph */}
               <motion.circle
@@ -161,7 +164,7 @@ export function SystemIntro({ onComplete, playerName }: SystemIntroProps) {
                 strokeDasharray="1 8"
                 className="text-cyan-300/60"
                 animate={{ rotate: 360 }}
-                transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
               />
             </svg>
           </motion.div>
@@ -181,33 +184,31 @@ export function SystemIntro({ onComplete, playerName }: SystemIntroProps) {
         {/* 4. TITLE MOMENT - Absolute centered overlay */}
         <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-20">
           <div className="text-center">
-            <div className="overflow-hidden h-16 md:h-24 mb-2">
+            <div className="overflow-visible h-16 md:h-24 mb-2 flex items-center justify-center">
               <motion.h1
-                initial={{ y: 100, opacity: 0, letterSpacing: "1.5em", paddingLeft: "1.5em" }}
+                initial={{ y: 0, scale: 1.25, opacity: 0, letterSpacing: "1.5em", paddingLeft: "1.5em", filter: "blur(20px)" }}
                 animate={phase >= 4 ? { 
                   y: 0,
+                  scale: 1,
                   opacity: 1,
-                  letterSpacing: "0.8em",
-                  paddingLeft: "0.8em",
-                  x: [0, -20, 20, -10, 0],
-                  filter: [
-                    "hue-rotate(0deg) brightness(1)", 
-                    "hue-rotate(90deg) brightness(2)", 
-                    "hue-rotate(-90deg) brightness(1.5)", 
-                    "hue-rotate(0deg) brightness(1)"
-                  ],
+                  letterSpacing: "0.6em",
+                  paddingLeft: "0.6em",
+                  filter: "blur(0px)",
                 } : {
-                  y: 100,
+                  y: 0,
+                  scale: 1.25,
                   opacity: 0,
                   letterSpacing: "1.5em",
-                  paddingLeft: "1.5em"
+                  paddingLeft: "1.5em",
+                  filter: "blur(20px)",
                 }}
                 transition={{ 
-                  duration: 2, 
-                  ease: [0.16, 1, 0.3, 1],
-                  x: { duration: 0.6, times: [0, 0.2, 0.4, 0.6, 1] },
-                  filter: { duration: 0.6, times: [0, 0.2, 0.4, 1] }
+                  opacity: { duration: 0.6, ease: "easeOut" },
+                  scale: { duration: 1.4, ease: [0.16, 1, 0.3, 1] },
+                  letterSpacing: { duration: 1.4, ease: [0.16, 1, 0.3, 1] },
+                  filter: { duration: 1 }
                 }}
+                style={{ willChange: "transform, opacity, filter, letter-spacing" }}
                 className="text-5xl md:text-8xl font-black text-white uppercase text-sharp hologram-glow-cyan magical-shimmer"
               >
                 ARISE
@@ -251,7 +252,8 @@ export function SystemIntro({ onComplete, playerName }: SystemIntroProps) {
           opacity: phase === 5 ? [0, 1, 0] : 0,
           scale: phase === 5 ? [0.8, 4] : 0.8,
         }}
-        transition={{ duration: 1.5, ease: "easeOut" }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
+        style={{ willChange: "transform, opacity" }}
         className="absolute inset-0 bg-white pointer-events-none mix-blend-overlay z-50"
       />
       

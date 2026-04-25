@@ -98,6 +98,7 @@
 
   .flicker {
     animation: flicker-anim 0.15s infinite;
+    will-change: opacity;
   }
 
   @keyframes flicker-anim {
@@ -114,6 +115,7 @@
     animation: energy-pulse-anim 0.6s ease-out forwards;
     pointer-events: none;
     z-index: 50;
+    will-change: transform, opacity;
   }
 
   @keyframes energy-pulse-anim {
@@ -158,6 +160,7 @@
   animation: glitch-anim 0.2s cubic-bezier(.25,.46,.45,.94) both infinite;
   filter: hue-rotate(90deg) brightness(1.2);
   text-shadow: 2px 0 #ff00c1, -2px 0 #00fff9;
+  will-change: transform, filter, text-shadow;
 }
 
 .text-sharp {
@@ -181,6 +184,7 @@
   animation: shimmer-anim 3s infinite linear;
   -webkit-background-clip: text;
   background-clip: text;
+  will-change: background-position;
 }
 
 @keyframes shimmer-anim {
