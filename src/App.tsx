@@ -58,6 +58,7 @@ export default function App() {
     state, 
     isGlitching, 
     activeOverlay, 
+    isUrgent,
     debugInfo,
     triggerGlitch, 
     triggerOverlay, 
@@ -142,6 +143,7 @@ export default function App() {
               triggerGlitch('high');
             }} 
             playerName={state.player.name}
+            isUrgent={isUrgent}
           />
         )}
       </AnimatePresence>
@@ -198,6 +200,7 @@ export default function App() {
       <AnimatePresence>
         {showResetModal && (
           <DailyResetModal 
+            isUrgent={isUrgent}
             onComplete={(inputs) => {
               dailyReset(inputs);
               setShowResetModal(false);
@@ -211,6 +214,7 @@ export default function App() {
         {showProfileModal && (
           <PlayerCardModal 
             player={state.player}
+            isUrgent={isUrgent}
             onSave={(name, avatar) => {
               triggerGlitch('high');
               updateProfile(name, avatar);
@@ -246,7 +250,7 @@ export default function App() {
       <main className="pt-16 pb-24 px-4 h-screen overflow-y-auto custom-scrollbar relative z-10">
       <AnimatePresence>
         {showQuestProtocol && (
-          <QuestProtocolModal onClose={() => {
+          <QuestProtocolModal isUrgent={isUrgent} onClose={() => {
             triggerGlitch('low');
             setShowQuestProtocol(false);
           }} />
@@ -257,6 +261,7 @@ export default function App() {
           {showRecoveryProtocol && (
             <RecoveryProtocolModal 
               level={state.player.level} 
+              isUrgent={isUrgent}
               onClose={() => {
                 triggerGlitch('low');
                 setShowRecoveryProtocol(false);
@@ -275,6 +280,7 @@ export default function App() {
             <RankProgressModal 
               rank={state.player.rank}
               level={state.player.level}
+              isUrgent={isUrgent}
               onClose={() => {
                 triggerGlitch('low');
                 setShowRankProgress(false);
@@ -310,11 +316,19 @@ export default function App() {
                 <div className="flex-1 min-w-0">
                   <div className="flex flex-col">
                     <div className="text-[8px] font-mono text-cyan-500/50 uppercase tracking-[0.3em] mb-0.5">Authenticated Trace</div>
-                    <div className="text-2xl sm:text-4xl font-black text-white tracking-tighter uppercase leading-none truncate mb-2">{state.player.name}</div>
+                    <div className={cn(
+                      "text-2xl sm:text-4xl font-black tracking-tighter uppercase leading-none truncate mb-2",
+                      isUrgent ? "text-white neon-glow-red" : "text-white neon-glow-cyan"
+                    )}>
+                      {state.player.name}
+                    </div>
                     
                     <div className="flex items-center gap-3">
                       <div className="flex items-center gap-1.5">
-                        <span className="text-xs sm:text-sm font-bold text-white/90 font-mono tracking-tight uppercase whitespace-nowrap">
+                        <span className={cn(
+                          "text-xs sm:text-sm font-bold font-mono tracking-tight uppercase whitespace-nowrap",
+                          isUrgent ? "text-white neon-glow-red" : "text-white neon-glow-cyan"
+                        )}>
                           LVL {state.player.level}
                         </span>
                         <span className={cn("px-1.5 py-0.5 border rounded-sm text-[8px] font-bold leading-none", getRankColor(state.player.rank))}>
@@ -347,21 +361,30 @@ export default function App() {
               <HolographicPanel title="Readiness" className="p-2">
                 <div className="flex flex-col items-center py-1">
                   <Activity className="w-4 h-4 text-cyan-400 mb-1" />
-                  <span className="text-xl font-bold text-white text-sharp">{state.player.readinessScore}%</span>
+                  <span className={cn(
+                    "text-xl font-bold text-sharp",
+                    isUrgent ? "text-white neon-glow-red" : "text-white neon-glow-cyan"
+                  )}>{state.player.readinessScore}%</span>
                   <span className="text-[7px] text-cyan-500/40 uppercase font-bold">Daily Sync</span>
                 </div>
               </HolographicPanel>
               <HolographicPanel title="Fitness" className="p-2">
                 <div className="flex flex-col items-center py-1">
                   <Flame className="w-4 h-4 text-orange-400 mb-1" />
-                  <span className="text-xl font-bold text-white text-sharp">{Math.floor(state.player.fitnessScore)}</span>
+                  <span className={cn(
+                    "text-xl font-bold text-sharp",
+                    isUrgent ? "text-white neon-glow-red" : "text-white neon-glow-cyan"
+                  )}>{Math.floor(state.player.fitnessScore)}</span>
                   <span className="text-[7px] text-orange-500/40 uppercase font-bold">Condition</span>
                 </div>
               </HolographicPanel>
               <HolographicPanel title="Discipline" className="p-2">
                 <div className="flex flex-col items-center py-1">
                   <CheckCircle2 className="w-4 h-4 text-green-400 mb-1" />
-                  <span className="text-xl font-bold text-white text-sharp">{state.player.disciplineScore}</span>
+                  <span className={cn(
+                    "text-xl font-bold text-sharp",
+                    isUrgent ? "text-white neon-glow-red" : "text-white neon-glow-cyan"
+                  )}>{state.player.disciplineScore}</span>
                   <span className="text-[7px] text-green-500/40 uppercase font-bold">Consistency</span>
                 </div>
               </HolographicPanel>
@@ -372,14 +395,20 @@ export default function App() {
               <HolographicPanel title="Vitality" className="bg-red-500/[0.02] border-red-500/10">
                 <div className="flex items-center gap-2 mb-2">
                   <Activity className="w-3 h-3 text-red-500/40" />
-                  <span className="text-2xl font-bold text-white text-sharp">{state.player.vitality}%</span>
+                  <span className={cn(
+                    "text-2xl font-bold text-sharp",
+                    isUrgent ? "text-white neon-glow-red" : "text-white neon-glow-cyan"
+                  )}>{state.player.vitality}%</span>
                 </div>
                 <ProgressBar value={state.player.vitality} max={100} color="bg-red-500" showSegments={false} />
               </HolographicPanel>
               <HolographicPanel title="Energy" className="bg-cyan-500/[0.02] border-cyan-500/10">
                 <div className="flex items-center gap-2 mb-2">
                   <Zap className="w-3 h-3 text-cyan-500/40" />
-                  <span className="text-2xl font-bold text-white text-sharp">{state.player.energy}%</span>
+                  <span className={cn(
+                    "text-2xl font-bold text-sharp",
+                    isUrgent ? "text-white neon-glow-red" : "text-white neon-glow-cyan"
+                  )}>{state.player.energy}%</span>
                 </div>
                 <ProgressBar value={state.player.energy} max={100} color="bg-cyan-500" showSegments={false} />
               </HolographicPanel>
@@ -396,7 +425,10 @@ export default function App() {
                     <div key={quest.id} className="p-2 border border-white/10 bg-white/5 rounded-sm flex justify-between items-center group active:bg-cyan-500/10 transition-colors cursor-pointer">
                       <div className="flex flex-col">
                         <span className="text-[8px] font-bold text-cyan-500/50 uppercase text-sharp">{quest.type}</span>
-                        <span className="text-xs font-bold tracking-tight text-white text-sharp">{quest.title}</span>
+                        <span className={cn(
+                          "text-xs font-bold tracking-tight text-sharp",
+                          isUrgent ? "text-white neon-glow-red" : "text-white neon-glow-cyan"
+                        )}>{quest.title}</span>
                       </div>
                       <ChevronRight className="w-3 h-3 text-white/20 group-active:text-cyan-400" />
                     </div>
@@ -418,7 +450,10 @@ export default function App() {
           <div className="space-y-4">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-2">
               <div className="flex flex-col">
-                <h2 className="text-xl font-bold text-white uppercase tracking-tighter text-sharp leading-none">Quest Log</h2>
+                <h2 className={cn(
+                  "text-xl font-bold uppercase tracking-tighter text-sharp leading-none",
+                  isUrgent ? "text-white neon-glow-red" : "text-white neon-glow-cyan"
+                )}>Quest Log</h2>
               </div>
               <div className="flex items-center gap-3">
                 <CountdownTimer />
@@ -453,7 +488,10 @@ export default function App() {
               >
                 <div className="space-y-2">
                   <div className="flex justify-between items-start">
-                    <h3 className="text-xs font-bold tracking-tight text-white uppercase text-sharp">{quest.title}</h3>
+                    <h3 className={cn(
+                      "text-xs font-bold tracking-tight uppercase text-sharp",
+                      isUrgent ? "text-white neon-glow-red" : "text-white neon-glow-cyan"
+                    )}>{quest.title}</h3>
                     {quest.status === 'COMPLETED' && <Trophy className="w-3 h-3 text-yellow-500/50" />}
                   </div>
                   <p className="text-[10px] text-white/70 leading-tight">{quest.description}</p>
@@ -504,7 +542,10 @@ export default function App() {
             <HolographicPanel title="Attribute Matrix" showScanlines>
               <div className="flex justify-between items-center mb-4">
                 <div className="flex flex-col">
-                  <span className="text-xl font-bold text-white uppercase tracking-tighter text-sharp">Matrix Sync</span>
+                  <span className={cn(
+                    "text-xl font-bold uppercase tracking-tighter text-sharp",
+                    isUrgent ? "text-white neon-glow-red" : "text-white neon-glow-cyan"
+                  )}>Matrix Sync</span>
                   <span className="text-[9px] font-bold text-cyan-500/40 uppercase text-sharp">System Analysis Active</span>
                 </div>
                 <div className="w-8 h-8 rounded-full border border-cyan-500/20 bg-cyan-500/5 flex items-center justify-center">
@@ -518,7 +559,10 @@ export default function App() {
                     <div className="flex flex-col flex-1">
                       <div className="flex justify-between items-center mb-1">
                         <span className="text-[10px] font-bold text-white/60 uppercase tracking-wider text-sharp">{attr.name}</span>
-                        <span className="text-sm font-bold text-cyan-400 text-sharp">{Math.round(attr.value || 0)}</span>
+                        <span className={cn(
+                          "text-sm font-bold text-sharp",
+                          isUrgent ? "text-white neon-glow-red" : "text-white neon-glow-cyan"
+                        )}>{Math.round(attr.value || 0)}</span>
                       </div>
                       <ProgressBar value={Math.round(attr.value || 0)} max={100} showSegments={false} />
                     </div>
@@ -653,7 +697,10 @@ export default function App() {
                         item.rarity === 'LEGENDARY' && "text-yellow-500"
                       )} />
                     </div>
-                    <h3 className="text-[8px] font-bold text-white uppercase text-center truncate">{item.name}</h3>
+                    <h3 className={cn(
+                      "text-[8px] font-bold uppercase text-center truncate",
+                      isUrgent ? "text-white neon-glow-red" : "text-white neon-glow-cyan"
+                    )}>{item.name}</h3>
                     <div className="flex justify-between items-center pt-1">
                       <span className="text-[9px] font-mono text-cyan-400/60">x{item.count}</span>
                       <button 
@@ -708,7 +755,7 @@ export default function App() {
                         <div 
                           className={cn(
                             "p-2 border rounded-sm transition-all relative overflow-hidden",
-                            isCurrent ? "border-cyan-500/40 bg-cyan-500/5 shadow-[0_0_10px_rgba(34,211,238,0.1)] cursor-pointer hover:bg-cyan-500/10" :
+                            isCurrent ? (isUrgent ? "border-red-500/40 bg-red-500/5 shadow-[0_0_10px_rgba(239,68,68,0.1)]" : "border-cyan-500/40 bg-cyan-500/5 shadow-[0_0_10px_rgba(34,211,238,0.1)]") + " cursor-pointer hover:bg-opacity-20" :
                             isCompleted ? "border-white/5 bg-white/5 opacity-50" :
                             "border-white/5 bg-transparent opacity-20"
                           )}
@@ -716,7 +763,10 @@ export default function App() {
                         >
                           <div className="flex justify-between items-center">
                             <div className="flex flex-col">
-                              <span className="text-[10px] font-mono font-bold text-white tracking-widest">{step.rank} RANK</span>
+                              <span className={cn(
+                                "text-[10px] font-mono font-bold tracking-widest",
+                                isCurrent ? (isUrgent ? "text-white neon-glow-red" : "text-white neon-glow-cyan") : "text-white"
+                              )}>{step.rank} RANK</span>
                               <span className="text-[8px] font-mono text-cyan-500/40 uppercase">{step.label}</span>
                               <span className="text-[7px] font-mono text-white/20 mt-1">{step.criteria}</span>
                             </div>
@@ -945,7 +995,7 @@ function ResetConfirmationModal({ onConfirm, onCancel }: { onConfirm: () => void
   );
 }
 
-function DailyResetModal({ onComplete }: { onComplete: (inputs: any) => void }) {
+function DailyResetModal({ onComplete, isUrgent }: { onComplete: (inputs: any) => void, isUrgent: boolean }) {
   const [sleep, setSleep] = useState(7);
   const [energy, setEnergy] = useState(7);
   const [fatigue, setFatigue] = useState(3);
@@ -963,7 +1013,10 @@ function DailyResetModal({ onComplete }: { onComplete: (inputs: any) => void }) 
       <GlitchProjection className="w-full max-w-sm">
         <HolographicPanel title="DAILY SYSTEM SYNC" className="p-6 space-y-6">
           <div className="space-y-1">
-            <h2 className="text-xl font-bold text-white uppercase tracking-tighter text-sharp">Readiness Input</h2>
+            <h2 className={cn(
+              "text-xl font-bold uppercase tracking-tighter text-sharp",
+              isUrgent ? "text-white neon-glow-red" : "text-white neon-glow-cyan"
+            )}>Readiness Input</h2>
             <p className="text-[10px] text-cyan-500/60 uppercase tracking-widest">Calibrating daily parameters...</p>
           </div>
 
@@ -1052,7 +1105,7 @@ function DailyResetModal({ onComplete }: { onComplete: (inputs: any) => void }) 
   );
 }
 
-function PlayerCardModal({ player, onSave, onClose }: { player: PlayerStats, onSave: (name: string, avatar: string) => void, onClose: () => void }) {
+function PlayerCardModal({ player, onSave, onClose, isUrgent }: { player: PlayerStats, onSave: (name: string, avatar: string) => void, onClose: () => void, isUrgent: boolean }) {
   const [name, setName] = useState(player.name);
   const [avatar, setAvatar] = useState(player.avatar || '');
   const [error, setError] = useState('');
@@ -1121,7 +1174,10 @@ function PlayerCardModal({ player, onSave, onClose }: { player: PlayerStats, onS
               <div className="flex-1 text-center sm:text-left space-y-2">
                 <div>
                   <div className="text-[10px] font-mono text-cyan-500/50 uppercase tracking-[0.4em] mb-1">Current Status</div>
-                  <div className="text-3xl sm:text-4xl font-black text-white tracking-tighter uppercase leading-none">{name || 'UNDEFINED'}</div>
+                  <div className={cn(
+                    "text-3xl sm:text-4xl font-black tracking-tighter uppercase leading-none",
+                    isUrgent ? "text-white neon-glow-red" : "text-white neon-glow-cyan"
+                  )}>{name || 'UNDEFINED'}</div>
                 </div>
                 <div className="flex items-center justify-center sm:justify-start gap-3 pt-1">
                   <span className="text-[11px] font-mono text-cyan-400 px-2 py-0.5 border border-cyan-500/30 bg-cyan-500/10">{player.rank} RANK</span>
@@ -1186,7 +1242,7 @@ function PlayerCardModal({ player, onSave, onClose }: { player: PlayerStats, onS
   );
 }
 
-function QuestProtocolModal({ onClose }: { onClose: () => void }) {
+function QuestProtocolModal({ onClose, isUrgent }: { onClose: () => void, isUrgent: boolean }) {
   const questData = [
     { rank: 'E', lvl: '1', push: '5', sit: '5', sq: '5', run: '1K' },
     { rank: 'D', lvl: '21', push: '24', sit: '24', sq: '24', run: '2K' },
@@ -1210,7 +1266,10 @@ function QuestProtocolModal({ onClose }: { onClose: () => void }) {
             <div className="flex justify-between items-center border-b border-cyan-500/20 pb-2">
               <div className="flex items-center gap-2">
                 <ScrollText className="w-4 h-4 text-cyan-400" />
-                <span className="text-xs font-bold text-white uppercase tracking-tighter">Mission Parameter Matrix</span>
+                <span className={cn(
+                  "text-xs font-bold uppercase tracking-tighter",
+                  isUrgent ? "text-white neon-glow-red" : "text-white neon-glow-cyan"
+                )}>Mission Parameter Matrix</span>
               </div>
               <button onClick={onClose} className="p-1 hover:bg-white/10 rounded-full transition-colors">
                 <X className="w-4 h-4 text-white/50" />
@@ -1230,9 +1289,15 @@ function QuestProtocolModal({ onClose }: { onClose: () => void }) {
                 <tbody className="divide-y divide-white/5">
                   {questData.map((row) => (
                     <tr key={row.rank} className="hover:bg-cyan-500/5 transition-colors">
-                      <td className="py-2 px-1 font-bold text-white">{row.rank} Rank</td>
+                      <td className={cn(
+                        "py-2 px-1 font-bold",
+                        isUrgent ? "text-white neon-glow-red" : "text-white neon-glow-cyan"
+                      )}>{row.rank} Rank</td>
                       <td className="py-2 px-1 text-white/60">{row.lvl}</td>
-                      <td className="py-2 px-1 text-center font-bold text-cyan-400 hologram-glow-cyan">{row.push}</td>
+                      <td className={cn(
+                        "py-2 px-1 text-center font-bold",
+                        isUrgent ? "text-red-500 hologram-glow-red" : "text-cyan-400 hologram-glow-cyan"
+                      )}>{row.push}</td>
                       <td className="py-2 px-1 text-right font-bold text-yellow-500">{row.run}</td>
                     </tr>
                   ))}
@@ -1255,7 +1320,7 @@ function QuestProtocolModal({ onClose }: { onClose: () => void }) {
   );
 }
 
-function RecoveryProtocolModal({ level, onClose, onAcknowledge }: { level: number; onClose: () => void; onAcknowledge: () => void }) {
+function RecoveryProtocolModal({ level, onClose, onAcknowledge, isUrgent }: { level: number; onClose: () => void; onAcknowledge: () => void; isUrgent: boolean }) {
   const getProtocol = (lvl: number) => {
     // ... logic remains same
     if (lvl <= 20) return { 
@@ -1301,7 +1366,10 @@ function RecoveryProtocolModal({ level, onClose, onAcknowledge }: { level: numbe
             <div className="flex justify-between items-center border-b border-cyan-500/20 pb-2">
               <div className="flex items-center gap-2">
                 <Activity className="w-4 h-4 text-green-400" />
-                <span className="text-xs font-bold text-white uppercase tracking-tighter">Bio-Metric Optimization</span>
+                <span className={cn(
+                  "text-xs font-bold uppercase tracking-tighter",
+                  isUrgent ? "text-white neon-glow-red" : "text-white neon-glow-cyan"
+                )}>Bio-Metric Optimization</span>
               </div>
               <button onClick={onClose} className="p-1 hover:bg-white/10 rounded-full transition-colors">
                 <X className="w-4 h-4 text-white/50" />
@@ -1344,7 +1412,7 @@ function RecoveryProtocolModal({ level, onClose, onAcknowledge }: { level: numbe
   );
 }
 
-function RankProgressModal({ rank, level, onClose }: { rank: Rank; level: number; onClose: () => void }) {
+function RankProgressModal({ rank, level, onClose, isUrgent }: { rank: Rank; level: number; onClose: () => void, isUrgent: boolean }) {
   const thresholds: Record<Rank, { min: number; next: number; title: string }> = {
     'E': { min: 1, next: 21, title: 'Ascension to D-Rank' },
     'D': { min: 21, next: 41, title: 'Ascension to C-Rank' },
@@ -1371,7 +1439,10 @@ function RankProgressModal({ rank, level, onClose }: { rank: Rank; level: number
           <div className="space-y-6">
              <div className="text-center space-y-2">
                <span className="text-[10px] font-mono text-cyan-500/60 uppercase tracking-widest">{current.title}</span>
-               <div className="text-4xl font-bold text-white tracking-tighter text-sharp">
+               <div className={cn(
+                 "text-4xl font-bold tracking-tighter text-sharp",
+                 isUrgent ? "text-white neon-glow-red" : "text-white neon-glow-cyan"
+               )}>
                  {rank === 'S' ? 'MAX' : `${Math.floor(progress)}%`}
                </div>
              </div>

@@ -130,6 +130,21 @@ export function useSystem() {
 
   const [isGlitching, setIsGlitching] = useState(false);
   const [activeOverlay, setActiveOverlay] = useState<'QUEST_ISSUED' | 'QUEST_CLEARED' | 'PENALTY' | 'HEALED' | null>(null);
+  const [isUrgent, setIsUrgent] = useState(false);
+
+  useEffect(() => {
+    const checkUrgency = () => {
+      const now = new Date();
+      const midnight = new Date();
+      midnight.setHours(23, 59, 59, 999);
+      const diff = midnight.getTime() - now.getTime();
+      setIsUrgent(diff > 0 && diff < 10800000); // 3 hours
+    };
+
+    checkUrgency();
+    const interval = setInterval(checkUrgency, 60000); // Check every minute
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     try {
@@ -540,6 +555,7 @@ export function useSystem() {
     state, 
     isGlitching, 
     activeOverlay, 
+    isUrgent,
     debugInfo,
     triggerGlitch, 
     triggerOverlay, 

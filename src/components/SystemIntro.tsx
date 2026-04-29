@@ -1,12 +1,15 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 
+import { cn } from '../lib/utils';
+
 interface SystemIntroProps {
   onComplete: () => void;
   playerName: string;
+  isUrgent?: boolean;
 }
 
-export function SystemIntro({ onComplete, playerName }: SystemIntroProps) {
+export function SystemIntro({ onComplete, playerName, isUrgent }: SystemIntroProps) {
   const [phase, setPhase] = useState(0);
   
   // Detect launch type and motion preference
@@ -209,7 +212,10 @@ export function SystemIntro({ onComplete, playerName }: SystemIntroProps) {
                   filter: { duration: 1 }
                 }}
                 style={{ willChange: "transform, opacity, filter, letter-spacing" }}
-                className="text-5xl md:text-8xl font-black text-white uppercase text-sharp hologram-glow-cyan magical-shimmer"
+                className={cn(
+                  "text-5xl md:text-8xl font-black uppercase text-sharp magical-shimmer",
+                  isUrgent ? "text-white neon-glow-red" : "text-white neon-glow-cyan"
+                )}
               >
                 ARISE
               </motion.h1>
@@ -226,7 +232,10 @@ export function SystemIntro({ onComplete, playerName }: SystemIntroProps) {
                 <motion.span 
                   animate={{ opacity: [0.4, 1, 0.4] }}
                   transition={{ duration: 2, repeat: Infinity }}
-                  className="text-[8px] md:text-xs font-mono text-cyan-400 tracking-[0.5em] uppercase pl-[0.5em]"
+                  className={cn(
+                    "text-[8px] md:text-xs font-mono tracking-[0.5em] uppercase pl-[0.5em]",
+                    isUrgent ? "text-red-400" : "text-cyan-400"
+                  )}
                 >
                   {phase >= 4 ? "AWAKENING PROTOCOL COMPLETE" : "SYNCHRONIZING..."}
                 </motion.span>
@@ -236,7 +245,10 @@ export function SystemIntro({ onComplete, playerName }: SystemIntroProps) {
               <motion.span
                 initial={{ opacity: 0 }}
                 animate={{ opacity: phase >= 4 ? 0.4 : 0 }}
-                className="text-[7px] md:text-[10px] font-mono text-white uppercase tracking-widest pl-[0.1em]"
+                className={cn(
+                  "text-[7px] md:text-[10px] font-mono uppercase tracking-widest pl-[0.1em]",
+                  isUrgent ? "text-white neon-glow-red" : "text-white neon-glow-cyan"
+                )}
               >
                 PLAYER: {playerName} // TRACE STABLE
               </motion.span>
